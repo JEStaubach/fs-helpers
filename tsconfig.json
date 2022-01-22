@@ -7,18 +7,17 @@
     "sourceMap": true,
     "target": "es6",
     "outDir": "./dist",
+    "declaration": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
       "src/*": ["./src/*"],
-      "__tests__/*": ["./__tests__/*"],
-      "__mocks__/*": ["__mocks__/*"],
-      "package.json": ["./package.json"]
+      "__tests__/*": ["./__tests__/*"]
     }
   },
   "include": [
-    "**/*.ts", "__tests__/**/*ts", "node_modules/@types"
+    "**/*.ts", "node_modules/@types"
   ],
   "exclude": [
     "node_modules", "__mocks__/**/*.ts", "dist"

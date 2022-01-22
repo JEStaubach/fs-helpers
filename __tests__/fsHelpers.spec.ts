@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs-extra';
-import fsHelpers from 'src/fsHelpers';
+import fsHelpers from 'src/index';
 import { spy } from '__tests__/testUtils';
 
 describe(`checkIfFileExists checks for the existence of a file`, () => {
