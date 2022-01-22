@@ -1,7 +1,7 @@
 {
   "name": "@jestaubach/fs-helpers",
   "version": "0.1.1",
-  "description": "A shared eslint configuration",
+  "description": "wrapper around fs-extra",
   "keywords": [],
   "homepage": "https://github.com/JEStaubach/fs-helpers",
   "bugs": {
