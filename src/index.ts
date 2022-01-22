@@ -1,5 +1,4 @@
-import { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync as rimraf, ensureFileSync as touch, outputFileSync } from 'fs-extra';
-import { sync as mkdirp } from 'mkdirp';
+import { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync as rimraf, ensureFileSync as touch, outputFileSync, mkdirpSync as mkdirp } from 'fs-extra';
 import path from 'path';
 import { Path, RetBool, RetPath, RetString, RetVal } from 'src/types';
 
@@ -75,7 +74,7 @@ export function createDir(dir: Path): RetPath {
     }
     return {
       success: true,
-      value: mkdirp(dir),
+      value: ((mkdirp(dir) as unknown) as string),
       error: null,
     };
   } catch (err) {
