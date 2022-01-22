@@ -1,6 +1,6 @@
 {
   "name": "@jestaubach/fs-helpers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A shared eslint configuration",
   "keywords": [],
   "homepage": "https://github.com/JEStaubach/fs-helpers",
@@ -22,7 +22,9 @@
   "license": "MIT",
   "private": false,
   "main": "dist/src/index.js",
-  "files": [ "dist/src" ],
+  "files": [
+    "dist/src"
+  ],
   "scripts": {
     "build": "tsc && tscpaths -p tsconfig.json -s ./ -o ./dist -v",
     "test": "npm run build && jest --filter=\"./dist/__tests__/testUtils/testFilter.js\"",
