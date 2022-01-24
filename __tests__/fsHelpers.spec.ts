@@ -1,348 +1,559 @@
+import fsh from 'src/index';
 import path from 'path';
-import fs from 'fs-extra';
-import fsHelpers from 'src/index';
 import { spy } from '__tests__/testUtils';
 
-describe(`checkIfFileExists checks for the existence of a file`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`checkFile`).value);
-    spy.clear();
-  });
+// iterate over mocked and unmocked versions of the library
+const fsLibraryVariations = {
+  mocked: fsh.use(fsh.default),
+  unmocked: fsh.use(fsh.mock),
+}
+Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`checkFile`).value);
-  });
+  // iterate over providng functions relative and absolute paths 
+  const pathVersions = {
+    relative: (pathArg: string) => (pathArg),
+    absolute: (pathArg: string) => (fsHelpers.getAbsolutePath(pathArg).value),
+  }
+  Object.entries(pathVersions).forEach(([pathVersion, pathResolver]) => {
 
-  test(`should create a directory and a file`, () => {
-    // Check File Existence (should not exist)
-    let res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`checkFile`).value);
-    expect(res.success).toBe(true);
-    expect(res.value).toBe(false);
-    expect(res.error).toBe(null);
-    // Create a temporary directory
-    fsHelpers.createDir(fsHelpers.getAbsolutePath(`checkFile`).value);
-    // Check File Existence (path is to a dir)
-    res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`checkFile`).value);
-    expect(res.success).toBe(false);
-    expect(res.value).toBe(false);
-    expect(res.error).toContain(`is not a file.`);
-    // Create a file
-    fsHelpers.touchFile(fsHelpers.getAbsolutePath(`checkFile/testFile`).value, 0);
-    // Check File Existence (should exist)
-    res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`checkFile/testFile`).value);
-    expect(res.success).toBe(true);
-    expect(res.value).toBe(true);
-    expect(res.error).toBe(null);
-  });
-});
+    describe(`[${key}]-[${pathVersion}] checkIfFileExists`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`checkFile`, `checkFile2`, `checkFile3`]);
+        spy.clear();
+      });
 
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`checkFile`, `checkFile2`, `checkFile3`]);
+      });
 
-describe(`checkIfDirExists checks for the existence of a directory`, () => {
-  beforeEach(() => {
-    spy.clear();
-  });
+      it(`sucessfully returns true when checking existence of a path to a file`, () => {
+        // Create a temporary directory
+        let res = fsHelpers.createDir(pathResolver(`checkFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`checkFile`).value);
+        expect(res.error).toBe(null);
+        // Check if directory exists (it should)
+        res = fsHelpers.checkIfDirExists(pathResolver(`checkFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // Create a file
+        res = fsHelpers.touchFile(pathResolver(`checkFile/checkFile`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check File Existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`checkFile/checkFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
 
-  test(`should return true if directory exists`, () => {
-    expect(fsHelpers.checkIfDirExists(path.resolve(`.`)).value).toBe(true);
-  });
+      it(`successfully returns false when a file does not exist`, () => {
+        // Check File Existence (should not exist)
+        let res = fsHelpers.checkIfFileExists(pathResolver(`checkFile2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+      });
 
-  test(`should return false if directory doesn't exist`, () => {
-    expect(fsHelpers.checkIfDirExists(path.resolve(`./SoMeThInG/uNuSuAl`)).value).toBe(false);
-  });
-});
-
-describe(`getAbsolutePath returns an absolute path from relative or abs path`, () => {
-  beforeEach(() => {
-    spy.clear();
-  });
-
-  test(`should raise error if provided a bad dir name`, () => {
-    const res = fsHelpers.getAbsolutePath(`<ABC`);
-    expect(res.success).toBe(false);
-    expect(res.value).toBe(undefined);
-    expect(res.error).toContain(`Error resolving path: '<ABC'. Received error: 'Error: Dir contains unsupported characters. Received <ABC.'`);    
-    expect(console.error).toHaveBeenLastCalledWith(`Error resolving path: <ABC`);    
-  });
-
-  test(`should return path relative to current direct if valid relative path`, () => {
-    expect(fsHelpers.getAbsolutePath(`sOmEtHiNg/UnUsUaL`).value).toBe(path.resolve(`./sOmEtHiNg/UnUsUaL`));
-  });
-
-  test(`should return path if valid relative path`, () => {
-    expect(fsHelpers.getAbsolutePath(path.resolve(`.`, `sOmEtHiNg/UnUsUaL`)).value).toBe(
-      path.resolve(`./sOmEtHiNg/UnUsUaL`),
-    );
-  });
-});
-
-describe(`createDir should create a directory at the provided location`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`bar`).value);
-    spy.clear();
-  });
-
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`bar`).value);
-  });
-
-  test(`should create a directory if provided an absolute path`, () => {
-    const createdDirsStartingLocation = fsHelpers.createDir(fsHelpers.getAbsolutePath(`bar`).value).value;
-    expect(fsHelpers.checkIfDirExists(fsHelpers.getAbsolutePath(`bar`).value).value).toBe(true);
-    expect(createdDirsStartingLocation).toBe(path.resolve(`.`, `bar`));
-  });
-
-  test(`should raise error if provided a path to a file`, () => {
-    const createdDirsStartingLocation = fsHelpers.createDir(fsHelpers.getAbsolutePath(`LICENSE`).value).value;
-    expect(createdDirsStartingLocation).toBe(undefined);
-    expect(console.error).toHaveBeenLastCalledWith(`Error creating dir: ${fsHelpers.getAbsolutePath(`LICENSE`).value}`);
-    expect(console.log).not.toHaveBeenCalled();
-  });
-
-  test(`should raise error if provided a relative path`, () => {
-    const createdDirsStartingLocation = fsHelpers.createDir(`bar`).value;
-    expect(console.error).toHaveBeenLastCalledWith(`Error creating dir: ${`bar`}`);
-    expect(createdDirsStartingLocation).toBe(undefined);
-  });
-
-});
-
-describe(`rimrafDir should delete a dir and its contents`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`vendor`).value);
-    spy.clear();
-  });
-
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`vendor`).value);
-  });
-
-  test(`should delete a directory that exists`, () => {
-    fsHelpers.createDir(fsHelpers.getAbsolutePath(`vendor/modules`).value);
-    const deletedDir = fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`vendor`).value).value;
-    expect(deletedDir).toBe(fsHelpers.getAbsolutePath(`vendor`).value);
-    expect(console.error).not.toHaveBeenCalled();
-    expect(fsHelpers.checkIfDirExists(`vendor`).value).toBe(false);
-  });
-
-  test(`should error when attempting to delete a directory that doesn't exist`, () => {
-    const deletedDir = fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`sOmEtHiNg`).value).value;
-    expect(deletedDir).toBe(undefined);
-    expect(console.error).not.toHaveBeenLastCalledWith(`Error deleting dir: ${`sOmEtHiNg`}`);
-    expect(fsHelpers.checkIfDirExists(`sOmEtHiNg`).value).toBe(false);
-  });
-
-  test(`should error when attempting to delete a directory that is not a dir`, () => {
-    const deletedDir = fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`LICENSE`).value).value;
-    expect(deletedDir).toBe(undefined);
-    expect(console.error).toHaveBeenLastCalledWith(`Error deleting dir: ${fsHelpers.getAbsolutePath(`LICENSE`).value}`);
-    expect(
-      fs.existsSync(fsHelpers.getAbsolutePath(`LICENSE`).value) &&
-        !fs.lstatSync(fsHelpers.getAbsolutePath(`LICENSE`).value).isDirectory(),
-    ).toBe(true);
-  });
-});
-
-describe(`rimrafDirs should delete multiple dirs and its contents`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir1`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir2`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir3`).value);
-    spy.clear();
-  });
-
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir1`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir2`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`dir3`).value);
-  });
-
-  test(`should delete multiple directories that exists`, () => {
-    fsHelpers.createDir(fsHelpers.getAbsolutePath(`dir1`).value);
-    fsHelpers.createDir(fsHelpers.getAbsolutePath(`dir2`).value);
-    expect(fsHelpers.checkIfDirExists(`dir1`).value).toBe(true);
-    expect(fsHelpers.checkIfDirExists(`dir2`).value).toBe(true);
-    expect(fsHelpers.checkIfDirExists(`dir3`).value).toBe(false);
-    const res = fsHelpers.rimrafDirs([
-      fsHelpers.getAbsolutePath(`dir1`).value,
-      fsHelpers.getAbsolutePath(`dir2`).value,
-      fsHelpers.getAbsolutePath(`dir3`).value]);
-    expect(res[0].value).toBe(fsHelpers.getAbsolutePath(`dir1`).value);
-    expect(res[1].value).toBe(fsHelpers.getAbsolutePath(`dir2`).value);
-    expect(res[2].value).toBe(undefined);
-    expect(res[0].success).toBe(true);
-    expect(res[1].success).toBe(true);
-    expect(res[2].success).toBe(false);
-    expect(res[0].error).toBe(null);
-    expect(res[1].error).toBe(null);
-    expect(res[2].error).toBe(`Error deleting dir: '${fsHelpers.getAbsolutePath(`dir3`).value}'`);
-    expect(fsHelpers.checkIfDirExists(`dir1`).value).toBe(false);
-    expect(fsHelpers.checkIfDirExists(`dir2`).value).toBe(false);
-    expect(fsHelpers.checkIfDirExists(`dir3`).value).toBe(false);
-  });
-});
-
-describe(`abortDirCreation should delete dirs that were created`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`baz`).value);
-    spy.clear();
-  });
-
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`baz`).value);
-  });
-
-  test(`should clean up any dirs created`, () => {
-    const dirToDelete = fsHelpers.createDir(fsHelpers.getAbsolutePath(`baz`).value).value;
-    fsHelpers.abortDirCreation(dirToDelete);
-    expect(console.error).toHaveBeenLastCalledWith(
-      `Cleaning up due to abort, directories created starting at: ${JSON.stringify(
-        fsHelpers.getAbsolutePath(`baz`).value,
-      )}`,
-    );
-  });
-
-  test(`should do nothing if no dirs to cleanup`, () => {
-    fsHelpers.abortDirCreation(null);
-    expect(console.error).toHaveBeenLastCalledWith(`Cleaning up due to abort, no directory to clean up.`);
-  });
-});
-
-describe(`renameDir should rename a directory`, () => {
-  beforeEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`firstName`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`secondName`).value);
-    spy.clear();
-  });
-
-  afterEach(() => {
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`firstName`).value);
-    fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`secondName`).value);
-  });
-
-  test(`should err on invalid dirs`, () => {
-    fsHelpers.renameDir(`./doesNotExist`, `./doesNotExistEither`);
-    expect(console.error).toHaveBeenLastCalledWith(`ENOENT`);
-  });
-
-  test(`renames dir`, () => {
-    fsHelpers.createDir(fsHelpers.getAbsolutePath(`firstName`).value);
-    expect(fsHelpers.checkIfDirExists(`firstName`).value).toBe(true);
-    expect(fsHelpers.checkIfDirExists(`secondName`).value).toBe(false);
-    fsHelpers.renameDir(`firstName`, `secondName`);  
-    expect(fsHelpers.checkIfDirExists(`firstName`).value).toBe(false);
-    expect(fsHelpers.checkIfDirExists(`secondName`).value).toBe(true);
-  })
-
-  describe(`read a file`, () => {
-    beforeEach(() => {
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`testDir`).value);
-      spy.clear();
-    });
-  
-    afterEach(() => {
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`testDir`).value);
-    });
-  
-    test(`should create a directory, write a file, and read back the file`, () => {
-      // Create a temporary directory
-      fsHelpers.createDir(fsHelpers.getAbsolutePath(`testDir`).value);
-      // Check File Existence (should not exist)
-      let res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`testDir/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(false);
-      expect(res.error).toBe(null);
-      // Write file
-      res = fsHelpers.writeFile(fsHelpers.getAbsolutePath(`testDir/testFile`).value, 'TEST FILE CONTENTS');
-      expect(res.success).toBe(true);
-      // Check File Existence (should exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`testDir/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(true);
-      expect(res.error).toBe(null);
-      // Read File 
-      const readData = fsHelpers.readFile(fsHelpers.getAbsolutePath(`testDir/testFile`).value);
-      expect(readData.success).toBe(true);
-      expect(readData.value).toBe('TEST FILE CONTENTS');
-    });
-  });
-
-  describe(`copy dir`, () => {
-    beforeEach(() => {
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`foo1`).value);
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`foo2`).value);
-      spy.clear();
-    });
-  
-    afterEach(() => {
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`foo1`).value);
-      fsHelpers.rimrafDir(fsHelpers.getAbsolutePath(`foo2`).value);
-    });
-  
-    test(`should recursively copy a src directory to dest directory`, () => {
-      // Create a temporary src directory
-      fsHelpers.createDir(fsHelpers.getAbsolutePath(`foo1`).value);
-      // Check src file existence (should not exist)
-      let res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo1/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(false);
-      expect(res.error).toBe(null);
-      // Create src file
-      fsHelpers.touchFile(fsHelpers.getAbsolutePath(`foo1/testFile`).value, 0);
-      // Check src file existence (should exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo1/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(true);
-      expect(res.error).toBe(null);
-      // Check dest file existence (should not exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo2/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(false);
-      expect(res.error).toBe(null);      
-      // copy src dir to dest dir 
-      res = fsHelpers.copyDirAbs(fsHelpers.getAbsolutePath(`foo1`).value, fsHelpers.getAbsolutePath(`foo2`).value);
-      expect(res.success).toBe(true);
-      // Check dest file existence (should exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo2/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(true);
-      expect(res.error).toBe(null);
+      it(`fails and produces an error when checking for the existence of a file on a directory`, () => {
+        // Create a temporary directory
+        let res = fsHelpers.createDir(pathResolver(`checkFile3`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`checkFile3`).value);
+        expect(res.error).toBe(null);
+        // Check File Existence (path is to a dir)
+        res = fsHelpers.checkIfFileExists(pathResolver(`checkFile3`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(false);
+        expect(res.error).toContain(`is not a file.`);
+      });
     });
 
-    test(`should fail if dest dir exists`, () => {
-      // Create a temporary src directory
-      fsHelpers.createDir(fsHelpers.getAbsolutePath(`foo1`).value);
-      // Check src file existence (should not exist)
-      let res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo1/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(false);
-      expect(res.error).toBe(null);
-      // Create src file
-      fsHelpers.touchFile(fsHelpers.getAbsolutePath(`foo1/testFile`).value, 0);
-      // Check src file existence (should exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo1/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(true);
-      expect(res.error).toBe(null);
-      // Create a temporary dest directory
-      fsHelpers.createDir(fsHelpers.getAbsolutePath(`foo2`).value);
-      // Check dest file existence (should not exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo2/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(false);
-      expect(res.error).toBe(null);      
-      // Create dest file
-      fsHelpers.touchFile(fsHelpers.getAbsolutePath(`foo2/testFile`).value, 0);
-      // Check dest file existence (should exist)
-      res = fsHelpers.checkIfFileExists(fsHelpers.getAbsolutePath(`foo2/testFile`).value);
-      expect(res.success).toBe(true);
-      expect(res.value).toBe(true);
-      expect(res.error).toBe(null);
-      // copy src dir to dest dir 
-      res = fsHelpers.copyDirAbs(fsHelpers.getAbsolutePath(`foo1`).value, fsHelpers.getAbsolutePath(`foo2`).value);
-      expect(res.success).toBe(false);
-      expect(res.error).toContain(`Error copying absolute`);
+    describe(`[${key}]-[${pathVersion}] checkIfDirExists`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`checkDir`, `checkDir2`]);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`checkDir`, `checkDir2`]);
+      });
+
+      it(`successfully returns true if directory exists, current working directory`, () => {
+        // check if cwd exists (it should)
+        let res = fsHelpers.checkIfDirExists(pathResolver(`.`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+
+      it(`successfully returns true if directory exists, temporary directory`, () => {
+        // Create a temporary directory
+        let res = fsHelpers.createDir(pathResolver(`checkDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`checkDir`).value);
+        expect(res.error).toBe(null);
+        // temp directory should exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`checkDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+
+      it(`successfully returns false if directory doesn't exist`, () => {
+        // this directory is assumed not to exist
+        let res = fsHelpers.checkIfDirExists(pathResolver(`./SoMeThInG/uNuSuAl`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+      });
+
+      it(`fails and errors out if checking existence of directory which is a file`, () => {
+        // Create a temporary directory
+        let res = fsHelpers.createDir(pathResolver(`checkDir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`checkDir2`).value);
+        expect(res.error).toBe(null);
+        // create a temp file
+        res = fsHelpers.touchFile(pathResolver(`checkDir2/checkDir`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check existence of a directory which is a file
+        res = fsHelpers.checkIfDirExists(pathResolver(`checkDir2/checkDir`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(false);
+        expect(res.error).toContain('is not a directory.');
+      });
     });
 
-  });
+    describe(`[${key}]-[${pathVersion}] getAbsolutePath`, () => {
+      beforeEach(() => {
+        spy.clear();
+      });
 
+      it(`successfully returns an absolute path when provided a path`, () => {
+        let res = fsHelpers.getAbsolutePath(pathResolver(`sOmEtHiNg/UnUsUaL`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(path.resolve(`./sOmEtHiNg/UnUsUaL`));
+        expect(res.error).toBe(null);
+      });
+
+      it(`fails and errors out if provided a bad dir name`, () => {
+        const res = fsHelpers.getAbsolutePath(`<ABC`);
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain(`Error resolving path: '<ABC'. Received error: 'Error: Dir contains unsupported characters. Received <ABC.'`);
+        expect(console.error).toHaveBeenCalled();
+        expect(console.error).toHaveBeenLastCalledWith(`Error resolving path: <ABC`);    
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] createDir`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`createDir`, `createDir2`]);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`createDir`, `createDir2`]);
+      });
+
+      it(`successfully creates a directory and returns the first directory in path created`, () => {
+        let res = fsHelpers.createDir(pathResolver(`createDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`createDir`).value);
+        expect(res.error).toBe(null);
+        // check existence of the directory (should exist)
+        res = fsHelpers.checkIfDirExists(pathResolver(`createDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+
+      it(`fails and returns error if provided a path to a file`, () => {
+        // Ensure file exists
+        let res = fsHelpers.touchFile(pathResolver(`LICENSE`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`LICENSE`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // try creating a directory with same name as an existing file
+        res = fsHelpers.createDir(pathResolver(`LICENSE`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain('Error creating dir');
+        expect(console.error).toHaveBeenLastCalledWith(`Error creating dir: ${pathResolver(`LICENSE`)}`);
+        expect(console.log).not.toHaveBeenCalled();
+      });
+
+      it(`fails and returns an error if no path provided`, () => {
+        let res = fsHelpers.createDir(pathResolver(undefined));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain(`Error creating dir:`);
+        expect(console.error).toHaveBeenLastCalledWith(`Error creating dir: ${undefined}`);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] rimrafDir`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDir(`vendor`);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDir(`vendor`);
+      });
+
+      it(`successfully deletes a directory and contents`, () => {
+        // create nested directories
+        let res = fsHelpers.createDir(pathResolver(`vendor/modules`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`vendor`).value);
+        expect(res.error).toBe(null);
+        expect(console.error).not.toHaveBeenCalled();
+        // check that the directories were created (child directory should exist)
+        res = fsHelpers.checkIfDirExists(pathResolver(`vendor/modules`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // delete the parent directory
+        res = fsHelpers.rimrafDir(pathResolver(`vendor`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(pathResolver(`vendor`));
+        expect(res.error).toBe(null);
+        expect(console.error).not.toHaveBeenCalled();
+        // check that the directories were deleted (parent directory should not exist)
+        res = fsHelpers.checkIfDirExists(pathResolver(`vendor`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+      });
+
+      it(`fails and returns an error when attempting to delete a directory that doesn't exist`, () => {
+        // directory to delete should not exist
+        let res = fsHelpers.checkIfDirExists(pathResolver(`sOmEtHiNg`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // try to delete a non-existent direcotry (should fail and produce an error)
+        res = fsHelpers.rimrafDir(pathResolver(`sOmEtHiNg`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain(`Error deleting dir:`);
+        expect(console.error).toHaveBeenLastCalledWith(`Error deleting dir: ${pathResolver(`sOmEtHiNg`)}`);
+      });
+
+      it(`fails and returns an error when attempting to delete a directory that is not a dir`, () => {
+        // Check file existence (should exist)
+        let res = fsHelpers.checkIfFileExists(pathResolver(`LICENSE`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // attempt to delete a directory that is an existing file
+        res = fsHelpers.rimrafDir(pathResolver(`LICENSE`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain(`Error deleting dir:`);
+        expect(console.error).toHaveBeenLastCalledWith(`Error deleting dir: ${pathResolver(`LICENSE`)}`);
+        // Check file existence (should still exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`LICENSE`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] rimrafDirs`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`dir1`, `dir2`, `dir3`]);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`dir1`, `dir2`, `dir3`])
+      });
+
+      it(`should successfully delete dirs that exist and fail to delete dirs that do not, returning the results in an array`, () => {
+        // create 1st directory to delete
+        let res = fsHelpers.createDir(pathResolver(`dir1`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`dir1`).value);
+        expect(res.error).toBe(null);
+        // 1st directory to delete should exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir1`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // 2nd directory to delete
+        res = fsHelpers.createDir(pathResolver(`dir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`dir2`).value);
+        expect(res.error).toBe(null);
+        // 2nd directory to delete should exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // 3rd directory to delete (should not exist)
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir3`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // delete all 3 directories
+        res = fsHelpers.rimrafDirs([
+          pathResolver(`dir1`),
+          pathResolver(`dir2`),
+          pathResolver(`dir3`),
+        ]);
+        // deleting existing directories should succeed, and non-existing should fail
+        expect(res[0].success).toBe(true);
+        expect(res[1].success).toBe(true);
+        expect(res[2].success).toBe(false);
+        // should return the directory deleted when successful, and undefined when not
+        expect(res[0].value).toBe(fsHelpers.getAbsolutePath(`dir1`).value);
+        expect(res[1].value).toBe(fsHelpers.getAbsolutePath(`dir2`).value);
+        expect(res[2].value).toBe(undefined);
+        // should return an error when not successful deleting, and null when successful
+        expect(res[0].error).toBe(null);
+        expect(res[1].error).toBe(null);
+        expect(res[2].error).toBe(`Error deleting dir: '${fsHelpers.getAbsolutePath(`dir3`).value}'`);
+        // 1st directory should no longer exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir1`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // 2nd directory should no longer exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // 3rd directory should still not exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`dir3`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] abortDirCreation`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDir(`abortDir`);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDir(`abortDir`);
+      });
+
+      it(`successfully clenas up directory created, for recovering from a process failure`, () => {
+        let res = fsHelpers.createDir(pathResolver(`abortDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`abortDir`).value);
+        expect(res.error).toBe(null);
+        // delete the directory that was created
+        res = fsHelpers.abortDirCreation(pathResolver(path.relative(path.resolve(`.`), res.value)));
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        expect(console.error).toHaveBeenLastCalledWith(
+          `Cleaning up due to abort, directories created starting at: ${JSON.stringify(
+            pathResolver(`abortDir`),
+          )}`,
+        );
+      });
+
+      it(`fails and returns an error if no dir to cleanup`, () => {
+        let res = fsHelpers.abortDirCreation(null);
+        expect(res.success).toBe(false);
+        expect(res.error).toContain(`no directory to clean up`);
+        expect(console.error).toHaveBeenLastCalledWith(`Cleaning up due to abort, no directory to clean up.`);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] renameDir`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`firstName`, `secondName`]);
+        spy.clear();
+      });
+
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`firstName`, `secondName`]);
+      });
+
+      it(`fails and returns an error when provided nonexistent source directory`, () => {
+        let res = fsHelpers.renameDir(pathResolver(`./doesNotExist`), pathResolver(`./doesNotExistEither`));
+        expect(res.success).toBe(false);
+        expect(res.value).toBe(undefined);
+        expect(res.error).toContain(`failed.`);
+        expect(console.error).toHaveBeenLastCalledWith(`ENOENT`);
+      });
+
+      it(`successfully renames the src dir to the dest dir`, () => {
+        // create the src directory
+        let res = fsHelpers.createDir(pathResolver(`firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`firstName`).value);
+        expect(res.error).toBe(null);
+        // ensure the src directory exists
+        res = fsHelpers.checkIfDirExists(pathResolver(`firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // expect the dest directory not to exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`secondName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // rename the source directory to the dest directory name
+        res = fsHelpers.renameDir(pathResolver(`firstName`), pathResolver(`secondName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toContain(`Successfully renamed the directory.`);
+        expect(res.error).toBe(null);
+        // the src directory should no longer exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // the dest directory should now exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`secondName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] readFile and writeFile`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDir(`readWrite`);
+        spy.clear();
+      });
+    
+      afterEach(() => {
+        fsHelpers.rimrafDir(`readWrite`);
+      });
+    
+      it(`sucessfully creates a directory, writes a file, and reads the same data back from the file`, () => {
+        // Create a temporary directory
+        let res = fsHelpers.createDir(pathResolver(`readWrite`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`readWrite`).value);
+        expect(res.error).toBe(null);
+        // Check File Existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`readWrite/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // Write file
+        res = fsHelpers.writeFile(pathResolver(`readWrite/testFile`), 'TEST FILE CONTENTS');
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check File Existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`readWrite/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // Read File 
+        res = fsHelpers.readFile(pathResolver(`readWrite/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe('TEST FILE CONTENTS');
+        expect(res.error).toBe(null);
+      });
+    });
+
+    describe(`[${key}]-[${pathVersion}] copyDir`, () => {
+      beforeEach(() => {
+        fsHelpers.rimrafDirs([`srcDir`, `destDir`, `srcDir2`, `destDir2`]);
+        spy.clear();
+      });
+    
+      afterEach(() => {
+        fsHelpers.rimrafDirs([`srcDir`, `destDir`, `srcDir2`, `destDir2`]);
+      });
+    
+      it(`successfully copies a src directory to dest directory`, () => {
+        // Create a temporary src directory
+        let res = fsHelpers.createDir(pathResolver(`srcDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`srcDir`).value);
+        expect(res.error).toBe(null);
+        // Check src file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`srcDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // Create src file
+        res = fsHelpers.touchFile(pathResolver(`srcDir/testFile`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check src file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`srcDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`destDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);      
+        // copy src dir to dest dir 
+        res = fsHelpers.copyDirAbs(pathResolver(`srcDir`), pathResolver(`destDir`));
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`destDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+
+      it(`fails and returns an error if copying a diretory and the dest dir exists`, () => {
+        // Create a temporary src directory
+        let res = fsHelpers.createDir(pathResolver(`srcDir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`srcDir2`).value);
+        expect(res.error).toBe(null);
+        // Check src file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`srcDir2/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // Create src file
+        res = fsHelpers.touchFile(pathResolver(`srcDir2/testFile`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check src file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`srcDir2/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // Create a temporary dest directory
+        res = fsHelpers.createDir(pathResolver(`destDir2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`destDir2`).value);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`destDir2/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);      
+        // Create dest file
+        res = fsHelpers.touchFile(pathResolver(`destDir2/testFile`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`destDir2/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // copy src dir to dest dir 
+        res = fsHelpers.copyDirAbs(pathResolver(`srcDir2`), pathResolver(`destDir2`));
+        expect(res.success).toBe(false);
+        expect(res.error).toContain(`Error copying absolute`);
+      });
+    });
+  });
 });
