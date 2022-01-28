@@ -164,7 +164,14 @@ function use(fsLibrary: any): any {
     }
   }
 
-  function readFile(fileName: Path): RetString {
+  function readFile(fileName: Path, overrideMock: boolean = false): RetString {
+    if (overrideMock) {
+      return {
+        success: true,
+        value: fsExtra.readFileSync(getAbsolutePath(fileName).value, `utf-8`) as unknown as string,
+        error: null,
+      }
+    }
     return {
       success: true,
       value: readFileSync(getAbsolutePath(fileName).value, `utf-8`) as unknown as string,

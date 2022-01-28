@@ -405,6 +405,14 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe('TEST FILE CONTENTS');
         expect(res.error).toBe(null);
       });
+
+      it(`sucessfully overrides reading mocking the readFile operation to read an existing file`, () => {
+        // Override mocking and read actual file
+        let res = fsHelpers.readFile(pathResolver(`LICENSE`), true);
+        expect(res.success).toBe(true);
+        expect(res.value).toContain(`MIT License`);
+        expect(res.error).toBe(null);
+      });
     });
 
     describe(`[${key}]-[${pathVersion}] copyDir`, () => {
