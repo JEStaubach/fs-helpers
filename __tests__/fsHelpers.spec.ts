@@ -407,8 +407,15 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
       });
 
       it(`sucessfully overrides reading mocking the readFile operation to read an existing file`, () => {
+        // mock existing file
+        fsHelpers.mockExistingFile(pathResolver(`LICENSE`));
+        // Check File Existence (should exist)
+        let res = fsHelpers.checkIfFileExists(pathResolver(`LICENSE`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
         // Override mocking and read actual file
-        let res = fsHelpers.readFile(pathResolver(`LICENSE`), true);
+        res = fsHelpers.readFile(pathResolver(`LICENSE`));
         expect(res.success).toBe(true);
         expect(res.value.toString(`utf8`)).toContain(`PROVIDED "AS IS", WITHOUT`);
         expect(res.error).toBe(null);

@@ -4,7 +4,12 @@ import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from 'src/types'
 import mock from 'src/mock';
 
 function use(fsLibrary: any): any {
-  const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync } = fsLibrary;
+  const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync, seedFile } = fsLibrary;
+
+  function mockExistingFile(fileName: string): void {
+    const absPath = getAbsolutePath(fileName).value;
+    if (seedFile !== undefined) seedFile(absPath);
+  }
 
   function checkIfFileExists(filePath: Path): RetBool {
     const absPath = getAbsolutePath(filePath).value;
@@ -164,14 +169,7 @@ function use(fsLibrary: any): any {
     }
   }
 
-  function readFile(fileName: Path, overrideMock: boolean = false): RetBuffer {
-    if (overrideMock) {
-      return {
-        success: true,
-        value: fsExtra.readFileSync(getAbsolutePath(fileName).value),
-        error: null,
-      }
-    }
+  function readFile(fileName: Path): RetBuffer {
     return {
       success: true,
       value: readFileSync(getAbsolutePath(fileName).value),
@@ -214,7 +212,8 @@ function use(fsLibrary: any): any {
     checkIfFileExists,
     readFile,
     writeFile,
-    touchFile
+    touchFile,
+    mockExistingFile,
   };
 }
 

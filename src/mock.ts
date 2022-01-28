@@ -3,6 +3,10 @@ import path from 'path';
 
 const mockFileSystem = new Map<string,[string, Buffer]>();
 
+function seedFile(fileName: string): void {
+  mockFileSystem.set(fileName, ['file', fs.readFileSync(fileName)]);
+}
+
 function existsSync(filePath: fs.PathLike): boolean {
   if (filePath === path.resolve(`.`)) return true;
   return mockFileSystem.has(filePath as string);
@@ -111,4 +115,4 @@ function outputFileSync(filename: string, data: string, options?: string | fs.Wr
   mockFileSystem.set(filename, ['file', Buffer.from(data, 'utf8')]);
 }
 
-export default { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, mkdirpSync, outputFileSync };
+export default { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, mkdirpSync, outputFileSync, seedFile };
