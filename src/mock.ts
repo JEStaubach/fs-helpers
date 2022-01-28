@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-const mockFileSystem = new Map<string,string[]>();
+const mockFileSystem = new Map<string,[string, Buffer]>();
 
 function existsSync(filePath: fs.PathLike): boolean {
   if (filePath === path.resolve(`.`)) return true;
@@ -70,7 +70,7 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
 }
 
 function readFileSync(filePath: number | fs.PathLike, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): string {
-  return mockFileSystem.get(filePath as string)[1];
+  return mockFileSystem.get(filePath as string)[1].toString(`utf-8`);
 }
 
 function copySync(src: string, dest: string, options?: fs.CopyOptionsSync): void {
@@ -90,7 +90,7 @@ function mkdirpSync(dir: string): any {
   for (let i = 0; i < dirs.length; i++){
     const subdir = dirs.slice(0,i+1).join(path.sep);
     if (!mockFileSystem.has(`${path.resolve(`.`)}${subdir}`) && subdir !== '') {
-      mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', '']);
+      mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', Buffer.from('',`utf-8`)]);
       first = first == undefined ? `${path.resolve(`.`)}${subdir}` : first;
     }
   }
@@ -104,11 +104,11 @@ function removeSync(filePath: string): void {
 }
 
 function ensureFileSync(filename: string): void {
-  mockFileSystem.set(filename, ['file','']);
+  mockFileSystem.set(filename, ['file',Buffer.from('',`utf-8`)]);
 }
 
-function outputFileSync(filename: string, data: any, options?: string | fs.WriteFileOptions) {
-  mockFileSystem.set(filename, ['file', data as string]);
+function outputFileSync(filename: string, data: string, options?: string | fs.WriteFileOptions) {
+  mockFileSystem.set(filename, ['file', Buffer.from(data, 'utf8')]);
 }
 
 export default { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, mkdirpSync, outputFileSync };

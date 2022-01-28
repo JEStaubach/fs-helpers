@@ -391,7 +391,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe(false);
         expect(res.error).toBe(null);
         // Write file
-        res = fsHelpers.writeFile(pathResolver(`${rootTestDir}/testFile`), 'TEST FILE CONTENTS');
+        res = fsHelpers.writeFile(pathResolver(`${rootTestDir}/testFile`), 'TEST "FILE" CONTENTS');
         expect(res.success).toBe(true);
         expect(res.error).toBe(null);
         // Check File Existence (should exist)
@@ -402,7 +402,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         // Read File 
         res = fsHelpers.readFile(pathResolver(`${rootTestDir}/testFile`));
         expect(res.success).toBe(true);
-        expect(res.value).toBe('TEST FILE CONTENTS');
+        expect(res.value).toBe('TEST "FILE" CONTENTS');
         expect(res.error).toBe(null);
       });
 
