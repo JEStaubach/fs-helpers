@@ -69,8 +69,8 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
   }
 }
 
-function readFileSync(filePath: number | fs.PathLike, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): string {
-  return mockFileSystem.get(filePath as string)[1].toString(`utf-8`);
+function readFileSync(filePath: number | fs.PathLike, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
+  return mockFileSystem.get(filePath as string)[1];
 }
 
 function copySync(src: string, dest: string, options?: fs.CopyOptionsSync): void {
@@ -104,7 +104,7 @@ function removeSync(filePath: string): void {
 }
 
 function ensureFileSync(filename: string): void {
-  mockFileSystem.set(filename, ['file',Buffer.from('',`utf-8`)]);
+  mockFileSystem.set(filename, ['file', Buffer.from('',`utf-8`)]);
 }
 
 function outputFileSync(filename: string, data: string, options?: string | fs.WriteFileOptions) {

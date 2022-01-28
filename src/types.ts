@@ -5,6 +5,10 @@ type RetVal = {
   error?: string;
 };
 
+interface RetBuffer extends RetVal {
+  value?: Buffer;
+}
+
 interface RetString extends RetVal {
   value?: string;
 }
@@ -22,5 +26,6 @@ export {
   RetBool,
   RetString,
   RetVal,
-  RetPath
+  RetPath,
+  RetBuffer,
 };

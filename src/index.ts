@@ -1,6 +1,6 @@
 import fsExtra from 'fs-extra';
 import path from 'path';
-import { Path, RetBool, RetPath, RetString, RetVal } from 'src/types';
+import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from 'src/types';
 import mock from 'src/mock';
 
 function use(fsLibrary: any): any {
@@ -164,17 +164,17 @@ function use(fsLibrary: any): any {
     }
   }
 
-  function readFile(fileName: Path, overrideMock: boolean = false): RetString {
+  function readFile(fileName: Path, overrideMock: boolean = false): RetBuffer {
     if (overrideMock) {
       return {
         success: true,
-        value: fsExtra.readFileSync(getAbsolutePath(fileName).value, `utf-8`) as unknown as string,
+        value: fsExtra.readFileSync(getAbsolutePath(fileName).value),
         error: null,
       }
     }
     return {
       success: true,
-      value: readFileSync(getAbsolutePath(fileName).value, `utf-8`) as unknown as string,
+      value: readFileSync(getAbsolutePath(fileName).value),
       error: null,
     };
   }

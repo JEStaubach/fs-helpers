@@ -402,7 +402,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         // Read File 
         res = fsHelpers.readFile(pathResolver(`${rootTestDir}/testFile`));
         expect(res.success).toBe(true);
-        expect(res.value).toBe('TEST "FILE" CONTENTS');
+        expect(res.value.toString(`utf8`)).toBe('TEST "FILE" CONTENTS');
         expect(res.error).toBe(null);
       });
 
@@ -410,7 +410,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         // Override mocking and read actual file
         let res = fsHelpers.readFile(pathResolver(`LICENSE`), true);
         expect(res.success).toBe(true);
-        expect(res.value).toContain(`MIT License`);
+        expect(res.value.toString(`utf8`)).toContain(`PROVIDED "AS IS", WITHOUT`);
         expect(res.error).toBe(null);
       });
     });
