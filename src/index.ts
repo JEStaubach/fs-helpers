@@ -6,11 +6,9 @@ import mock from 'src/mock';
 function use(fsLibrary: any, seedFiles?: string[]): any {
   const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync, seedFile } = fsLibrary;
 
-  function init() {
-    if (seedFile !== undefined && seedFiles !== undefined) {
-      for (const file of seedFiles) {
-        mockExistingFile(file);
-      }
+  if (seedFile !== undefined && seedFiles !== undefined) {
+    for (const file of seedFiles) {
+      mockExistingFile(file);
     }
   }
 
@@ -223,7 +221,6 @@ function use(fsLibrary: any, seedFiles?: string[]): any {
     readFile,
     writeFile,
     touchFile,
-    init,
   };
 }
 

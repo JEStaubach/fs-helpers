@@ -10,7 +10,6 @@ const fsLibraryVariations = {
   mocked: fsh.use(fsh.mock, [`LICENSE`]),
   unmocked: fsh.use(fsh.default),
 }
-fsLibraryVariations.mocked.init();
 Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
   // iterate over providng functions relative and absolute paths 
