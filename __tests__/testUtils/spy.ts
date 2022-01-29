@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const globalAny: any = global;
 
@@ -7,9 +8,9 @@ function setup(): void {
   globalAny.stdoutSpy = jest.spyOn(process.stdout, `write`).mockImplementation();
   globalAny.consoleSpyErr = jest.spyOn(console, `error`).mockImplementation();
   globalAny.stderrSpy = jest.spyOn(process.stderr, `write`).mockImplementation();
-  globalAny.mockExit = jest.spyOn(process, `exit`).mockImplementation((): never => {
-    throw new Error(`exit`);
-  });
+  // globalAny.mockExit = jest.spyOn(process, `exit`).mockImplementation((): never => {
+  //   throw new Error(`exit`);
+  // });
 }
 
 // clear(): clean up mocked spy functions
@@ -18,7 +19,7 @@ function clear(): void {
   globalAny.consoleSpyErr.mockClear();
   globalAny.stdoutSpy.mockClear();
   globalAny.stderrSpy.mockClear();
-  globalAny.mockExit.mockClear();
+  //globalAny.mockExit.mockClear();
 }
 
 export { setup, clear };

@@ -376,6 +376,39 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe(true);
         expect(res.error).toBe(null);
       });
+
+      it(`successfully renames the src dir to the dest dir - fixed bug when dest dir contains src dir`, () => {
+        // create the src directory
+        let res = fsHelpers.createDir(pathResolver(`${rootTestDir}/firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`${rootTestDir}`).value);
+        expect(res.error).toBe(null);
+        // ensure the src directory exists
+        res = fsHelpers.checkIfDirExists(pathResolver(`${rootTestDir}/firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // expect the dest directory not to exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`${rootTestDir}/firstName2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // rename the source directory to the dest directory name
+        res = fsHelpers.renameDir(pathResolver(`${rootTestDir}/firstName`), pathResolver(`${rootTestDir}/firstName2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toContain(`Successfully renamed the directory.`);
+        expect(res.error).toBe(null);
+        // the src directory should no longer exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`${rootTestDir}/firstName`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // the dest directory should now exist
+        res = fsHelpers.checkIfDirExists(pathResolver(`${rootTestDir}/firstName2`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
     });
 
     describe(`[${key}]-[${pathVersion}] readFile and writeFile`, () => {
@@ -452,6 +485,42 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.error).toBe(null);
         // Check dest file existence (should exist)
         res = fsHelpers.checkIfFileExists(pathResolver(`${rootTestDir}/destDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });
+
+      it(`successfully copies a src directory to dest directory`, () => {
+        // Create a temporary src directory
+        let res = fsHelpers.createDir(pathResolver(`${rootTestDir}/srcDir`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(fsHelpers.getAbsolutePath(`${rootTestDir}`).value);
+        expect(res.error).toBe(null);
+        // Check src file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`${rootTestDir}/srcDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);
+        // Create src file
+        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`), 0);
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check src file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`${rootTestDir}/srcDir/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should not exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`${rootTestDir}/srcDir2/testFile`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(false);
+        expect(res.error).toBe(null);      
+        // copy src dir to dest dir 
+        res = fsHelpers.copyDirAbs(pathResolver(`${rootTestDir}/srcDir`), pathResolver(`${rootTestDir}/srcDir2`));
+        expect(res.success).toBe(true);
+        expect(res.error).toBe(null);
+        // Check dest file existence (should exist)
+        res = fsHelpers.checkIfFileExists(pathResolver(`${rootTestDir}/srcDir2/testFile`));
         expect(res.success).toBe(true);
         expect(res.value).toBe(true);
         expect(res.error).toBe(null);

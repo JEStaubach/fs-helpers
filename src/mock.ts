@@ -73,7 +73,7 @@ class ENOENTError extends Error {
 
 function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
   if (!mockFileSystem.has(oldPath as string)) throw new ENOENTError('source path not found');
-  for (const key of mockFileSystem.keys()) {
+  for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(oldPath as string)) {
       const newName = key.split(oldPath as string).join(newPath as string);
       const newVal = mockFileSystem.get(key);
@@ -85,7 +85,7 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
 
 function copySync(src: string, dest: string, options?: fs.CopyOptionsSync): void {
   if (mockFileSystem.has(dest)) throw Error('destination directory exists')
-  for (const key of mockFileSystem.keys()) {
+  for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(src)) {
       const newName = key.split(src).join(dest);
       mockFileSystem.set(newName, mockFileSystem.get(key));
@@ -108,7 +108,7 @@ function mkdirpSync(dir: string): any {
 }
 
 function removeSync(filePath: string): void {
-  for (const key of mockFileSystem.keys()) {
+  for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(filePath)) mockFileSystem.delete(key);
   }
 }
