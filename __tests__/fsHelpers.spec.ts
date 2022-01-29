@@ -7,9 +7,10 @@ const rootTestDir = `.testDir`;
 
 // iterate over mocked and unmocked versions of the library
 const fsLibraryVariations = {
-  mocked: fsh.use(fsh.default),
-  unmocked: fsh.use(fsh.mock),
+  mocked: fsh.use(fsh.mock, [`LICENSE`]),
+  unmocked: fsh.use(fsh.default),
 }
+fsLibraryVariations.mocked.init();
 Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
   // iterate over providng functions relative and absolute paths 
@@ -402,14 +403,12 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         // Read File 
         res = fsHelpers.readFile(pathResolver(`${rootTestDir}/testFile`));
         expect(res.success).toBe(true);
-        expect(res.value.toString(`utf8`)).toBe('TEST "FILE" CONTENTS');
+        expect(res.value.toString(`utf-8`)).toBe('TEST "FILE" CONTENTS');
         expect(res.error).toBe(null);
       });
 
-      it(`sucessfully overrides reading mocking the readFile operation to read an existing file`, () => {
-        // mock existing file
-        fsHelpers.mockExistingFile(pathResolver(`LICENSE`));
-        // Check File Existence (should exist)
+      it(`sucessfully reads an existing file`, () => {
+        // Check File Existence (should exist - seeded when mocked)
         let res = fsHelpers.checkIfFileExists(pathResolver(`LICENSE`));
         expect(res.success).toBe(true);
         expect(res.value).toBe(true);
@@ -417,7 +416,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         // Override mocking and read actual file
         res = fsHelpers.readFile(pathResolver(`LICENSE`));
         expect(res.success).toBe(true);
-        expect(res.value.toString(`utf8`)).toContain(`PROVIDED "AS IS", WITHOUT`);
+        expect(res.value.toString(`utf-8`)).toContain(`PROVIDED "AS IS", WITHOUT`);
         expect(res.error).toBe(null);
       });
     });

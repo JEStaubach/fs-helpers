@@ -3,12 +3,38 @@ import path from 'path';
 import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from 'src/types';
 import mock from 'src/mock';
 
-function use(fsLibrary: any): any {
+function use(fsLibrary: any, seedFiles?: string[]): any {
   const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync, seedFile } = fsLibrary;
+
+  function init() {
+    if (seedFile !== undefined && seedFiles !== undefined) {
+      for (const file of seedFiles) {
+        mockExistingFile(file);
+      }
+    }
+  }
 
   function mockExistingFile(fileName: string): void {
     const absPath = getAbsolutePath(fileName).value;
-    if (seedFile !== undefined) seedFile(absPath);
+    if (seedFile !== undefined) {
+      seedFile(absPath);
+    }
+  }
+
+  function readFile(fileName: Path): RetBuffer {
+    return {
+      success: true,
+      value: readFileSync(getAbsolutePath(fileName).value),
+      error: null,
+    };
+  }
+
+  function writeFile(fileName: Path, data: string): RetVal {
+    outputFileSync(getAbsolutePath(fileName).value, data);
+    return {
+      success: true,
+      error: null
+    };
   }
 
   function checkIfFileExists(filePath: Path): RetBool {
@@ -169,22 +195,6 @@ function use(fsLibrary: any): any {
     }
   }
 
-  function readFile(fileName: Path): RetBuffer {
-    return {
-      success: true,
-      value: readFileSync(getAbsolutePath(fileName).value),
-      error: null,
-    };
-  }
-
-  function writeFile(fileName: Path, data: string): RetVal {
-    outputFileSync(getAbsolutePath(fileName).value, data);
-    return {
-      success: true,
-      error: null
-    };
-  }
-
   function copyDirAbs(src: Path, dest: Path): RetVal {
     try {
       copySync(getAbsolutePath(src).value, getAbsolutePath(dest).value, { overwrite: false, errorOnExist: true });
@@ -213,7 +223,7 @@ function use(fsLibrary: any): any {
     readFile,
     writeFile,
     touchFile,
-    mockExistingFile,
+    init,
   };
 }
 

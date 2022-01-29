@@ -1,10 +1,20 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-const mockFileSystem = new Map<string,[string, Buffer]>();
+const mockFileSystem = new Map<string,[string, string]>();
 
 function seedFile(fileName: string): void {
-  mockFileSystem.set(fileName, ['file', fs.readFileSync(fileName)]);
+  const seedData = fs.readFileSync(fileName).toString();
+  outputFileSync(fileName, seedData);
+}
+
+function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
+  const [ _type, data ] = mockFileSystem.get(filePath);
+  return Buffer.from(data);
+}
+
+function outputFileSync(filename: string, data: string, options?: string | fs.WriteFileOptions) {
+  mockFileSystem.set(filename, ['file', data]);
 }
 
 function existsSync(filePath: fs.PathLike): boolean {
@@ -73,10 +83,6 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
   }
 }
 
-function readFileSync(filePath: number | fs.PathLike, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
-  return mockFileSystem.get(filePath as string)[1];
-}
-
 function copySync(src: string, dest: string, options?: fs.CopyOptionsSync): void {
   if (mockFileSystem.has(dest)) throw Error('destination directory exists')
   for (const key of mockFileSystem.keys()) {
@@ -94,7 +100,7 @@ function mkdirpSync(dir: string): any {
   for (let i = 0; i < dirs.length; i++){
     const subdir = dirs.slice(0,i+1).join(path.sep);
     if (!mockFileSystem.has(`${path.resolve(`.`)}${subdir}`) && subdir !== '') {
-      mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', Buffer.from('',`utf-8`)]);
+      mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', '']);
       first = first == undefined ? `${path.resolve(`.`)}${subdir}` : first;
     }
   }
@@ -108,11 +114,7 @@ function removeSync(filePath: string): void {
 }
 
 function ensureFileSync(filename: string): void {
-  mockFileSystem.set(filename, ['file', Buffer.from('',`utf-8`)]);
-}
-
-function outputFileSync(filename: string, data: string, options?: string | fs.WriteFileOptions) {
-  mockFileSystem.set(filename, ['file', Buffer.from(data, 'utf8')]);
+  if (!mockFileSystem.has(filename)) mockFileSystem.set(filename, ['file', '']);
 }
 
 export default { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, mkdirpSync, outputFileSync, seedFile };
