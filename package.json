@@ -1,6 +1,6 @@
 {
   "name": "@jestaubach/fs-helpers",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "wrapper around fs-extra",
   "keywords": [],
   "homepage": "https://github.com/JEStaubach/fs-helpers",
