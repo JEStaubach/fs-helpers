@@ -3,7 +3,7 @@ import path from 'path';
 import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from 'src/types';
 import mock from 'src/mock';
 
-function use(fsLibrary: any, seedFiles?: string[]): any {
+function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
   const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync, seedFile } = fsLibrary;
 
   if (seedFile !== undefined && seedFiles !== undefined) {

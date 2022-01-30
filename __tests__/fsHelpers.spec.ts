@@ -7,7 +7,7 @@ const rootTestDir = `.testDir`;
 
 // iterate over mocked and unmocked versions of the library
 const fsLibraryVariations = {
-  mocked: fsh.use(fsh.mock, [`LICENSE`]),
+  mocked: fsh.use(fsh.mock, [`LICENSE`, `src/types.ts`]),
   unmocked: fsh.use(fsh.default),
 }
 Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
@@ -28,6 +28,24 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
     // teardown
     afterEach(() => {
       fsHelpers.rimrafDir(`${rootTestDir}`);
+    });
+
+    describe(`[${key}]-[${pathVersion}] seedFile`, () => {
+      it(`sucessfully returns true when checking existence of a seeded file`, () => {
+        // Check File Existence (should exist - seeded when mocked)
+        let res = fsHelpers.checkIfFileExists(pathResolver(`src/types.ts`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });    
+
+      it(`sucessfully returns true when checking existence of parent dir`, () => {
+        // Check Dir Existence (should exist - created when seeding file when mocked)
+        let res = fsHelpers.checkIfDirExists(pathResolver(`src`));
+        expect(res.success).toBe(true);
+        expect(res.value).toBe(true);
+        expect(res.error).toBe(null);
+      });    
     });
 
     describe(`[${key}]-[${pathVersion}] checkIfFileExists`, () => {

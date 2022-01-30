@@ -4,8 +4,15 @@ import path from 'path';
 const mockFileSystem = new Map<string,[string, string]>();
 
 function seedFile(fileName: string): void {
+  const {root, dir, } = path.parse(fileName);
+  const separatedPathMinusRoot = dir.split(root).slice(1).join('').split(path.sep);
+  for (let i = 0; i < separatedPathMinusRoot.length; i++) {
+    const subpath = [root, separatedPathMinusRoot.slice(0,i+1).join(path.sep)].join('');
+    mkdirpSync(subpath);
+  }
   const seedData = fs.readFileSync(fileName).toString();
   outputFileSync(fileName, seedData);
+
 }
 
 function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
