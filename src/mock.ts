@@ -16,11 +16,11 @@ function seedFile(fileName: string): void {
 }
 
 function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
-  const [ _type, data ] = mockFileSystem.get(filePath);
+  const [ _type, data ] = mockFileSystem.get(filePath) || ['',''];
   return Buffer.from(data);
 }
 
-function outputFileSync(filename: string, data: string, options?: string | fs.WriteFileOptions) {
+function outputFileSync(filename: string, data: string, _options?: string | fs.WriteFileOptions) {
   mockFileSystem.set(filename, ['file', data]);
 }
 
@@ -29,10 +29,11 @@ function existsSync(filePath: fs.PathLike): boolean {
   return mockFileSystem.has(filePath as string);
 }
 
-function lstatSync(filePath: fs.PathLike, options?: fs.StatOptions & { bigint?: false }): fs.Stats {
+function lstatSync(filePath: fs.PathLike, _options?: fs.StatOptions & { bigint?: false }): fs.Stats {
+  const [ type, _data ] = mockFileSystem.get(filePath as string) || ['',''];
   const retVal = {
-    isDirectory: () => filePath === path.resolve(`.`) ? true : mockFileSystem.get(filePath as string)[0] === 'dir',
-    isFile: () => mockFileSystem.has(filePath as string) && mockFileSystem.get(filePath as string)[0] === 'file',
+    isDirectory: () => filePath === path.resolve(`.`) ? true : type === 'dir',
+    isFile: () => mockFileSystem.has(filePath as string) && type === 'file',
     isBlockDevice: () => false,
     isCharacterDevice: () => false,
     isSymbolicLink: () => false,
@@ -66,7 +67,7 @@ function lstatSync(filePath: fs.PathLike, options?: fs.StatOptions & { bigint?: 
   return retVal;
 }
 
-function chmodSync(filePath: fs.PathLike, mode: fs.Mode): void {
+function chmodSync(_filePath: fs.PathLike, _mode: fs.Mode): void {
   return;
 }
 
@@ -83,19 +84,20 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
   for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(oldPath as string)) {
       const newName = key.split(oldPath as string).join(newPath as string);
-      const newVal = mockFileSystem.get(key);
+      const newVal = mockFileSystem.get(key) || /* istanbul ignore next */ ['',''];
       mockFileSystem.delete(key);
       mockFileSystem.set(newName, newVal);
     }
   }
 }
 
-function copySync(src: string, dest: string, options?: fs.CopyOptionsSync): void {
+function copySync(src: string, dest: string, _options?: fs.CopyOptionsSync): void {
   if (mockFileSystem.has(dest)) throw Error('destination directory exists')
   for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(src)) {
       const newName = key.split(src).join(dest);
-      mockFileSystem.set(newName, mockFileSystem.get(key));
+      mockFileSystem.set(newName, mockFileSystem.get(key) || /* istanbul ignore next */ ['','']
+      );
     }
   }
 }

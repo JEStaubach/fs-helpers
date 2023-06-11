@@ -2,7 +2,7 @@ type Path = string;
 
 type RetVal = {
   success: boolean;
-  error?: string;
+  error?: string | null;
 };
 
 interface RetBuffer extends RetVal {
@@ -21,7 +21,7 @@ interface RetPath extends RetVal {
   value?: Path;
 }
 
-export {
+export type {
   Path,
   RetBool,
   RetString,

@@ -1,6 +1,6 @@
-import fsh from 'src/index';
+import fsh from '../src/index';
 import path from 'path';
-import { spy } from '__tests__/testUtils';
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 
 // create all test directories and files inside one root directory for easy cleanup
 const rootTestDir = `.testDir`;
@@ -15,14 +15,14 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
   // iterate over providng functions relative and absolute paths 
   const pathVersions = {
     relative: (pathArg: string) => (pathArg),
-    absolute: (pathArg: string) => (fsHelpers.getAbsolutePath(pathArg).value),
+    absolute: (pathArg: string | undefined) => (fsHelpers.getAbsolutePath(pathArg).value),
   }
   Object.entries(pathVersions).forEach(([pathVersion, pathResolver]) => {
 
     // setup
     beforeEach(() => {
       fsHelpers.rimrafDir(`${rootTestDir}`);
-      spy.clear();
+      vi.resetAllMocks();
     });
 
     // teardown
@@ -150,12 +150,13 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
       });
 
       it(`fails and errors out if provided a bad dir name`, () => {
+        const spy = vi.spyOn(console, `error`);
         const res = fsHelpers.getAbsolutePath(`<ABC`);
         expect(res.success).toBe(false);
         expect(res.value).toBe(undefined);
         expect(res.error).toContain(`Error resolving path: '<ABC'. Received error: 'Error: Dir contains unsupported characters. Received <ABC.'`);
-        expect(console.error).toHaveBeenCalled();
-        expect(console.error).toHaveBeenLastCalledWith(`Error resolving path: <ABC`);    
+        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenLastCalledWith(`Error resolving path: <ABC`);    
       });
     });
 
@@ -178,6 +179,9 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
       });
 
       it(`fails and returns error if provided a path to a file`, () => {
+        const spyLog = vi.spyOn(console, `log`);
+        const spyErr = vi.spyOn(console, `error`);
+
         // Ensure file exists
         let res = fsHelpers.touchFile(pathResolver(`LICENSE`), 0);
         expect(res.success).toBe(true);
@@ -192,8 +196,8 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.success).toBe(false);
         expect(res.value).toBe(undefined);
         expect(res.error).toContain('Error creating dir');
-        expect(console.error).toHaveBeenLastCalledWith(`Error creating dir: ${pathResolver(`LICENSE`)}`);
-        expect(console.log).not.toHaveBeenCalled();
+        expect(spyErr).toHaveBeenLastCalledWith(`Error creating dir: ${pathResolver(`LICENSE`)}`);
+        expect(spyLog).not.toHaveBeenCalled();
       });
 
       it(`fails and returns an error if no path provided`, () => {
@@ -346,20 +350,22 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
       });
 
       it(`fails and returns an error if no dir to cleanup`, () => {
+        const spy = vi.spyOn(console, `error`);
         let res = fsHelpers.abortDirCreation(null);
         expect(res.success).toBe(false);
         expect(res.error).toContain(`no directory to clean up`);
-        expect(console.error).toHaveBeenLastCalledWith(`Cleaning up due to abort, no directory to clean up.`);
+        expect(spy).toHaveBeenLastCalledWith(`Cleaning up due to abort, no directory to clean up.`);
       });
     });
 
     describe(`[${key}]-[${pathVersion}] renameDir`, () => {
       it(`fails and returns an error when provided nonexistent source directory`, () => {
+        const spy = vi.spyOn(console, `error`);
         let res = fsHelpers.renameDir(pathResolver(`./doesNotExist`), pathResolver(`./doesNotExistEither`));
         expect(res.success).toBe(false);
         expect(res.value).toBe(undefined);
         expect(res.error).toContain(`failed.`);
-        expect(console.error).toHaveBeenLastCalledWith(`ENOENT`);
+        expect(spy).toHaveBeenLastCalledWith(`ENOENT`);
       });
 
       it(`successfully renames the src dir to the dest dir`, () => {
@@ -556,7 +562,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe(false);
         expect(res.error).toBe(null);
         // Create src file
-        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`), 0);
+        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`));
         expect(res.success).toBe(true);
         expect(res.error).toBe(null);
         // Check src file existence (should exist)

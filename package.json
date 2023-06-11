@@ -1,6 +1,10 @@
 {
   "name": "@jestaubach/fs-helpers",
   "version": "0.2.9",
+  "type": "module",
+  "main": "./dist/fs-helpers.umd.cjs",
+  "module": "./dist/fs-helpers.js",
+  "types": "./dist/index.d.ts",
   "description": "wrapper around fs-extra",
   "keywords": [],
   "homepage": "https://github.com/JEStaubach/fs-helpers",
@@ -21,16 +25,12 @@
   ],
   "license": "MIT",
   "private": false,
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
   "files": [
-    "dist/src"
+    "dist"
   ],
   "scripts": {
-    "build": "tsc && tscpaths -p tsconfig.json -s ./ -o ./dist -v",
-    "test": "npm run build && jest --filter=\"./dist/__tests__/testUtils/testFilter.js\"",
-    "bump": "npm version patch",
-    "release": "git push --tags && npm publish"
+    "build": "tsc && vite build",
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "fs-extra": "^10.0.0",
@@ -38,11 +38,12 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/jest": "^28.1.6",
     "@types/mkdirp": "^1.0.2",
     "@types/node": "^18.7.1",
-    "@xascode/tscpaths": "^0.1.4",
-    "ts-jest": "^28.0.7",
-    "typescript": "^4.5.5"
+    "@vitest/coverage-istanbul": "^0.32.0",
+    "typescript": "^4.5.5",
+    "vite": "^4.3.9",
+    "vite-plugin-dts": "^2.3.0",
+    "vitest": "^0.32.0"
   }
 }

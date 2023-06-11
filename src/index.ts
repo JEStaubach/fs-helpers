@@ -1,7 +1,8 @@
+
 import fsExtra from 'fs-extra';
 import path from 'path';
-import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from 'src/types';
-import mock from 'src/mock';
+import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from './types';
+import mock from './mock';
 
 function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
   const { existsSync, lstatSync, chmodSync, renameSync, readFileSync, copySync, removeSync, ensureFileSync, outputFileSync, mkdirpSync, seedFile } = fsLibrary;
@@ -14,9 +15,7 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
 
   function mockExistingFile(fileName: string): void {
     const absPath = getAbsolutePath(fileName).value;
-    if (seedFile !== undefined) {
-      seedFile(absPath);
-    }
+    seedFile(absPath);
   }
 
   function readFile(fileName: Path): RetBuffer {
@@ -58,7 +57,7 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
     };
   }
 
-  function checkIfDirExists(dir: Path): RetBool {
+  function checkIfDirExists(dir: Path | undefined): RetBool {
     const absDir = getAbsolutePath(dir).value;
     if (!existsSync(absDir)) {
       return {
@@ -81,8 +80,11 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
     };
   }
 
-  function getAbsolutePath(dir: Path): RetPath {
+  function getAbsolutePath(dir: Path | undefined): RetPath {
     try {
+      if (dir === undefined) {
+        throw Error(`Dir is undefined.`);
+      }
       if (dir.match(/^[.a-zA-Z0-9\-_/:\\]+$/g) === null) {
         throw Error(`Dir contains unsupported characters. Received ${dir}.`);
       }
@@ -135,7 +137,7 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
     };
   }
 
-  function rimrafDir(dir: Path): RetPath {
+  function rimrafDir(dir: Path | undefined): RetPath {
     const absPath = getAbsolutePath(dir).value;
     if (absPath !== undefined && checkIfDirExists(dir).value) {
       removeSync(dir);
@@ -156,6 +158,7 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
   function rimrafDirs(dirs: Path[]): RetPath[] {
     return dirs.map((dir) => {
       return rimrafDir(getAbsolutePath(dir).value);
+      //return rimrafDir(dir);
     });
   }
 
@@ -183,7 +186,7 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
         value: `Successfully renamed the directory.`,
         error: null,
       };
-    } catch (err) {
+    } catch (err: any) {
       console.error(err.code);
       return {
         success: false,
