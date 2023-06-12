@@ -14,7 +14,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
   // iterate over providng functions relative and absolute paths 
   const pathVersions = {
-    relative: (pathArg: string) => (pathArg),
+    relative: (pathArg: string | undefined) => (pathArg),
     absolute: (pathArg: string | undefined) => (fsHelpers.getAbsolutePath(pathArg).value),
   }
   Object.entries(pathVersions).forEach(([pathVersion, pathResolver]) => {
