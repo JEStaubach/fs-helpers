@@ -1,4 +1,4 @@
-type Path = string;
+type Path = string; //NOSONAR
 
 type RetVal = {
   success: boolean;

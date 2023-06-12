@@ -16,7 +16,7 @@ function seedFile(fileName: string): void {
 }
 
 function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
-  const [ _type, data ] = mockFileSystem.get(filePath) || ['',''];
+  const [ _type, data ] = mockFileSystem.get(filePath) ?? ['',''];
   return Buffer.from(data);
 }
 
@@ -30,7 +30,7 @@ function existsSync(filePath: fs.PathLike): boolean {
 }
 
 function lstatSync(filePath: fs.PathLike, _options?: fs.StatOptions & { bigint?: false }): fs.Stats {
-  const [ type, _data ] = mockFileSystem.get(filePath as string) || ['',''];
+  const [ type, _data ] = mockFileSystem.get(filePath as string) ?? ['',''];
   const retVal = {
     isDirectory: () => filePath === path.resolve(`.`) ? true : type === 'dir',
     isFile: () => mockFileSystem.has(filePath as string) && type === 'file',
@@ -84,7 +84,7 @@ function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
   for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(oldPath as string)) {
       const newName = key.split(oldPath as string).join(newPath as string);
-      const newVal = mockFileSystem.get(key) || /* istanbul ignore next */ ['',''];
+      const newVal = mockFileSystem.get(key) ?? /* istanbul ignore next */ ['',''];
       mockFileSystem.delete(key);
       mockFileSystem.set(newName, newVal);
     }
@@ -96,7 +96,7 @@ function copySync(src: string, dest: string, _options?: fs.CopyOptionsSync): voi
   for (const key of Array.from(mockFileSystem.keys())) {
     if (key.includes(src)) {
       const newName = key.split(src).join(dest);
-      mockFileSystem.set(newName, mockFileSystem.get(key) || /* istanbul ignore next */ ['','']
+      mockFileSystem.set(newName, mockFileSystem.get(key) ?? /* istanbul ignore next */ ['','']
       );
     }
   }
@@ -110,7 +110,7 @@ function mkdirpSync(dir: string): any {
     const subdir = dirs.slice(0,i+1).join(path.sep);
     if (!mockFileSystem.has(`${path.resolve(`.`)}${subdir}`) && subdir !== '') {
       mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', '']);
-      first = first == undefined ? `${path.resolve(`.`)}${subdir}` : first;
+      first = first ?? `${path.resolve(`.`)}${subdir}`;
     }
   }
   return first;

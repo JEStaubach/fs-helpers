@@ -1,4 +1,3 @@
-
 import fsExtra from 'fs-extra';
 import path from 'path';
 import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from './types';
@@ -158,7 +157,6 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
   function rimrafDirs(dirs: Path[]): RetPath[] {
     return dirs.map((dir) => {
       return rimrafDir(getAbsolutePath(dir).value);
-      //return rimrafDir(dir);
     });
   }
 
