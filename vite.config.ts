@@ -3,6 +3,9 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import commonjsExternals from 'vite-plugin-commonjs-externals';
+
+const externals = ['child_process'];
 
 export default defineConfig({
   build: {
@@ -22,7 +25,12 @@ export default defineConfig({
       },
     }
   },
-  plugins: [dts()],
+  optimizeDeps: {
+    exclude: externals,
+  },
+  plugins: [dts(), commonjsExternals({
+    externals,
+  })],
   test: {
     coverage: {
       provider: 'istanbul'

@@ -16,7 +16,7 @@ function seedFile(fileName: string): void {
 }
 
 function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): Buffer {
-  const [ _type, data ] = mockFileSystem.get(filePath) ?? ['',''];
+  const [ _type, data ] = mockFileSystem.get(filePath);
   return Buffer.from(data);
 }
 
