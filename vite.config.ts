@@ -19,7 +19,7 @@ const externals = [
   'stream',
   ...builtinModules,
   ...Object.keys(pkg.dependencies).map(
-    name => (new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')).toString()
+    name => new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')
   )
 ];
 
@@ -42,7 +42,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: externals,
+    exclude: externals as string[],
   },
   plugins: [dts(), commonjsExternals({
     externals,
