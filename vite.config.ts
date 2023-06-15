@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import commonjsExternals from 'vite-plugin-commonjs-externals';
 
-const externals = ['child_process'];
+const externals = ['path', 'constants', 'util', 'assert', 'fs', 'stream'];
 
 export default defineConfig({
   build: {
