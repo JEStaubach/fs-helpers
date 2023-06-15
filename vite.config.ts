@@ -2,10 +2,26 @@
 
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
+import lodash from 'lodash';
+import builtinModules from 'builtin-modules';
+import pkg from './package.json';
 import dts from 'vite-plugin-dts';
 import commonjsExternals from 'vite-plugin-commonjs-externals';
 
-const externals = ['path', 'constants', 'util', 'assert', 'fs', 'stream'];
+const { escapeRegExp } = lodash;
+
+const externals = [
+  'path', 
+  'constants', 
+  'util', 
+  'assert', 
+  'fs', 
+  'stream',
+  ...builtinModules,
+  ...Object.keys(pkg.dependencies).map(
+    name => new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')
+  )
+];
 
 export default defineConfig({
   build: {
