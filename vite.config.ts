@@ -19,7 +19,7 @@ const externals = [
   'stream',
   ...builtinModules,
   ...Object.keys(pkg.dependencies).map(
-    name => new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')
+    name => (new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')).toString()
   )
 ];
 
