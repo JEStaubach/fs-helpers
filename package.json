@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "build": "tsc && vite build",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage --reporter dot"
   },
   "dependencies": {
     "builtin-modules": "^3.3.0",
