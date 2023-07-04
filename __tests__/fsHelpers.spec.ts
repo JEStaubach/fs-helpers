@@ -183,7 +183,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         const spyErr = vi.spyOn(console, `error`);
 
         // Ensure file exists
-        let res = fsHelpers.touchFile(pathResolver(`LICENSE`), 0);
+        let res = fsHelpers.touchFile(pathResolver(`LICENSE`));
         expect(res.success).toBe(true);
         expect(res.error).toBe(null);
         // Check file existence (should exist)
@@ -490,7 +490,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe(false);
         expect(res.error).toBe(null);
         // Create src file
-        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`), 0);
+        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`));
         expect(res.success).toBe(true);
         expect(res.error).toBe(null);
         // Check src file existence (should exist)
@@ -526,7 +526,7 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(res.value).toBe(false);
         expect(res.error).toBe(null);
         // Create src file
-        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`), 0);
+        res = fsHelpers.touchFile(pathResolver(`${rootTestDir}/srcDir/testFile`));
         expect(res.success).toBe(true);
         expect(res.error).toBe(null);
         // Check src file existence (should exist)
