@@ -18,10 +18,10 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
     seedFile(absPath);
   }
 
-  function readFile(fileName: Path): RetBuffer {
+  function readFile(fileName: Path, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): RetBuffer {
     return {
       success: true,
-      value: readFileSync(getAbsolutePath(fileName).value),
+      value: readFileSync(getAbsolutePath(fileName).value, options),
       error: null,
     };
   }
