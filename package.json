@@ -1,6 +1,6 @@
 {
   "name": "@jestaubach/fs-helpers",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "type": "module",
   "main": "./dist/fs-helpers.umd.cjs",
   "module": "./dist/fs-helpers.js",
