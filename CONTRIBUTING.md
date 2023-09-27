@@ -27,6 +27,7 @@ Adapted from "Standard" Release Process described [here](https://cloudfour.com/t
 ### git push
 
 1. git push -u origin --tags
+1. git push -u origin
 
 ## Debugging
 
