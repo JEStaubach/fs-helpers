@@ -45,7 +45,7 @@
     "@types/node": "^20.7.0",
     "@vitest/coverage-istanbul": "^0.34.5",
     "typescript": "^5.2.2",
-    "vite": "^4.4.4",
+    "vite": "^4.4.9",
     "vite-plugin-dts": "^3.3.0",
     "vitest": "^0.34.5"
   }
