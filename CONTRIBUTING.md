@@ -18,7 +18,7 @@ Adapted from "Standard" Release Process described [here](https://cloudfour.com/t
 
 ### Update the version number
 
-1. npm version [patch|minor|major]
+1. .scripts/bump.sh [patch|minor|major]
 
 ### Publish to npm
 
