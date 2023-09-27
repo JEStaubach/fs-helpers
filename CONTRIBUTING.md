@@ -14,6 +14,7 @@ Adapted from "Standard" Release Process described [here](https://cloudfour.com/t
 ### Prepare the release
 
 1. npm run build
+1. npm test
 
 ### Update the version number
 
