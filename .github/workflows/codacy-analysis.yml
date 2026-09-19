@@ -47,6 +47,25 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
 
+      - name: Normalize SARIF runs
+        shell: bash
+        run: |
+          run_count=$(jq '.runs | length' results.sarif)
+
+          if [ "$run_count" -gt 1 ]; then
+            jq '
+              .runs = [
+                (
+                  .runs[0] + {
+                    results: ([.runs[] | .results // []] | add)
+                  }
+                )
+              ]
+            ' results.sarif > results-normalized.sarif
+          else
+            cp results.sarif results-normalized.sarif
+          fi
+
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
