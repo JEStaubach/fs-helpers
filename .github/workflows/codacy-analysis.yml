@@ -38,6 +38,7 @@ jobs:
           # You can also omit the token and run the tools that support default configurations
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
+          tool: eslint-8
           output: results.sarif
           format: sarif
           # Adjust severity of non-security issues
@@ -51,4 +52,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
         with:
           sarif_file: results.sarif
-          category: codacy-${{ github.event_name }}
+          category: codacy-eslint
