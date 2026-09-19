@@ -110,9 +110,10 @@ function use(fsLibrary: any, seedFiles?: string[]): any { //NOSONAR
         throw Error(`Function "createDir" expected a path. Recieved "${dir}".`);
       }
       const absDir = getAbsolutePath(dir).value;
+      const createdDir = (mkdirpSync(absDir) as unknown) as string;
       return {
         success: true,
-        value: ((mkdirpSync(absDir) as unknown) as string),
+        value: path.normalize(createdDir.replace(/^\\\\\?\\/, '')),
         error: null,
       };
     } catch (err) {
