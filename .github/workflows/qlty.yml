@@ -1,26 +1,31 @@
-name: Codecov
+name: Qlty Coverage
+
 on: [push, pull_request]
+
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  run:
+  coverage:
+    name: Coverage / Node 22
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.x
           cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Build
         run: npm run build
       - name: Run tests and collect coverage
-        run: npm run test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        run: npm test
+      - name: Upload coverage to Qlty
+        uses: qltysh/qlty-action/coverage@v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./coverage/
-          fail_ci_if_error: true
-          verbose: true
+          oidc: true
+          files: coverage/lcov.info

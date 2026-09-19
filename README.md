@@ -2,8 +2,8 @@
 
 ## Badges
 
-[![Test Coverage](https://api.codeclimate.com/v1/badges/4896190d45c4fb79ce45/test_coverage)](https://codeclimate.com/github/JEStaubach/fs-helpers/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/4896190d45c4fb79ce45/maintainability)](https://codeclimate.com/github/JEStaubach/fs-helpers/maintainability)
+[![Maintainability](https://qlty.sh/gh/JEStaubach/projects/fs-helpers/maintainability.svg)](https://qlty.sh/gh/JEStaubach/projects/fs-helpers)
+[![Code Coverage](https://qlty.sh/gh/JEStaubach/projects/fs-helpers/coverage.svg)](https://qlty.sh/gh/JEStaubach/projects/fs-helpers)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/626bca3c1fab45fcb7b6f658b7e04604)](https://app.codacy.com/gh/JEStaubach/fs-helpers/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/626bca3c1fab45fcb7b6f658b7e04604)](https://app.codacy.com/gh/JEStaubach/fs-helpers/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Known Vulnerabilities](https://snyk.io/test/github/JEStaubach/fs-helpers/badge.svg)](https://snyk.io/test/github/JEStaubach/fs-helpers)

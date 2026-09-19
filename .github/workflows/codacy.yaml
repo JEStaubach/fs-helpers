@@ -8,12 +8,12 @@ jobs:
     name: codacy-coverage-reporter
     steps:
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build ${{ matrix.test_number }}s
         run: npm run build
