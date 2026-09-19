@@ -10,6 +10,16 @@ const fsLibraryVariations = {
   mocked: fsh.use(fsh.mock, [`LICENSE`, `src/types.ts`]),
   unmocked: fsh.use(fsh.default),
 }
+
+describe(`mock readFile fallback`, () => {
+  it(`returns an empty buffer when a mocked file is missing`, () => {
+    const res = fsLibraryVariations.mocked.readFile(`missing-file`);
+    expect(res.success).toBe(true);
+    expect(res.value?.toString()).toBe(``);
+    expect(res.error).toBe(null);
+  });
+});
+
 Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
   // iterate over providng functions relative and absolute paths 

@@ -1,7 +1,8 @@
 import fs from 'fs-extra';
-import path from 'path';
+import path from 'node:path';
 
 const mockFileSystem = new Map<string,[string, string]>();
+type EntryReplacement = { source: string; target: string; deleteSource: boolean };
 
 function seedFile(fileName: string): void {
   const {root, dir, } = path.parse(fileName);
@@ -20,7 +21,7 @@ function readFileSync(filePath: string, _options?: { encoding: BufferEncoding; f
   return Buffer.from(data);
 }
 
-function outputFileSync(filename: string, data: string, _options?: string | fs.WriteFileOptions) {
+function outputFileSync(filename: string, data: string, _options?: fs.WriteFileOptions) {
   mockFileSystem.set(filename, ['file', data]);
 }
 
@@ -80,40 +81,52 @@ class ENOENTError extends Error {
 }
 
 function renameSync(oldPath: fs.PathLike, newPath: fs.PathLike): void {
-  if (!mockFileSystem.has(oldPath as string)) throw new ENOENTError('source path not found');
+  const oldName = oldPath as string;
+  const newName = newPath as string;
+  if (!mockFileSystem.has(oldName)) throw new ENOENTError('source path not found');
+  replaceEntries(oldName, newName, true);
+}
+
+function replaceEntries(source: string, target: string, deleteSource: boolean): void {
+  const replacement = { source, target, deleteSource };
   for (const key of Array.from(mockFileSystem.keys())) {
-    if (key.includes(oldPath as string)) {
-      const newName = key.split(oldPath as string).join(newPath as string);
-      const newVal = mockFileSystem.get(key) || /* istanbul ignore next */ ['',''];
-      mockFileSystem.delete(key);
-      mockFileSystem.set(newName, newVal);
-    }
+    replaceEntry(key, replacement);
   }
+}
+
+function replaceEntry(key: string, replacement: EntryReplacement): void {
+  if (!key.includes(replacement.source)) return;
+  const newName = key.split(replacement.source).join(replacement.target);
+  const value = mockFileSystem.get(key) || /* istanbul ignore next */ ['',''];
+  if (replacement.deleteSource) mockFileSystem.delete(key);
+  mockFileSystem.set(newName, value);
 }
 
 function copySync(src: string, dest: string, _options?: fs.CopyOptionsSync): void {
-  if (mockFileSystem.has(dest)) throw Error('destination directory exists')
-  for (const key of Array.from(mockFileSystem.keys())) {
-    if (key.includes(src)) {
-      const newName = key.split(src).join(dest);
-      mockFileSystem.set(newName, mockFileSystem.get(key) || /* istanbul ignore next */ ['','']
-      );
-    }
-  }
+  if (mockFileSystem.has(dest)) throw new Error('destination directory exists');
+  replaceEntries(src, dest, false);
 }
 
-function mkdirpSync(dir: string): any {
-  if (lstatSync(dir).isFile()) throw Error('file exists at destination');
+function createMissingDirectories(dirs: string[]): string | undefined {
   let first = undefined;
-  const dirs = dir.split(path.resolve(`.`)).join('').split(path.sep);
-  for (let i = 0; i < dirs.length; i++){
+  for (let i = 0; i < dirs.length; i++) {
     const subdir = dirs.slice(0,i+1).join(path.sep);
-    if (!mockFileSystem.has(`${path.resolve(`.`)}${subdir}`) && subdir !== '') {
-      mockFileSystem.set(`${path.resolve(`.`)}${subdir}`, ['dir', '']);
-      first = first == undefined ? `${path.resolve(`.`)}${subdir}` : first;
-    }
+    const fullPath = `${path.resolve(`.`)}${subdir}`;
+    first = createDirectoryIfMissing(fullPath, subdir, first);
   }
   return first;
+}
+
+function createDirectoryIfMissing(fullPath: string, subdir: string, first: string | undefined): string | undefined {
+  if (mockFileSystem.has(fullPath) || subdir === '') return first;
+  mockFileSystem.set(fullPath, ['dir', '']);
+  return first ?? fullPath;
+}
+
+function mkdirpSync(dir: string): string | undefined {
+  if (lstatSync(dir).isFile()) throw new Error('file exists at destination');
+  const dirs = dir.split(path.resolve(`.`)).join('').split(path.sep);
+  return createMissingDirectories(dirs);
 }
 
 function removeSync(filePath: string): void {
