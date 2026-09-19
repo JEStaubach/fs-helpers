@@ -66,9 +66,11 @@ jobs:
             cp results.sarif results-normalized.sarif
           fi
 
+          jq -e '.runs | length == 1' results-normalized.sarif
+
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
         with:
-          sarif_file: results.sarif
+          sarif_file: results-normalized.sarif
           category: codacy-eslint
