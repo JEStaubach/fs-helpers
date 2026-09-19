@@ -109,9 +109,10 @@ function copySync(src: string, dest: string, _options?: fs.CopyOptionsSync): voi
 
 function createMissingDirectories(dirs: string[]): string | undefined {
   let first = undefined;
+  const rootPath = path.resolve(`.`);
   for (let i = 0; i < dirs.length; i++) {
     const subdir = dirs.slice(0,i+1).join(path.sep);
-    const fullPath = `${path.resolve(`.`)}${subdir}`;
+    const fullPath = `${rootPath}${subdir}`;
     first = createDirectoryIfMissing(fullPath, subdir, first);
   }
   return first;

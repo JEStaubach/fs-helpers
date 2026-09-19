@@ -1,5 +1,3 @@
-type Path = string;
-
 type RetVal = {
   success: boolean;
   error?: string | null;
@@ -18,11 +16,10 @@ interface RetBool extends RetVal {
 }
 
 interface RetPath extends RetVal {
-  value?: Path;
+  value?: string;
 }
 
 export type {
-  Path,
   RetBool,
   RetString,
   RetVal,

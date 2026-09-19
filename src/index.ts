@@ -1,7 +1,7 @@
 
 import fsExtra from 'fs-extra';
 import path from 'node:path';
-import { Path, RetBool, RetPath, RetString, RetVal, RetBuffer } from './types';
+import { RetBool, RetPath, RetString, RetVal, RetBuffer } from './types';
 import mock from './mock';
 
 class FsHelpers {
@@ -36,7 +36,7 @@ class FsHelpers {
     this.seedFile(absPath);
   }
 
-  readFile(fileName: Path, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): RetBuffer {
+  readFile(fileName: string, options?: { encoding: BufferEncoding; flag?: string; } | BufferEncoding): RetBuffer {
     return {
       success: true,
       value: this.readFileSync(this.getAbsolutePath(fileName).value, options),
@@ -44,13 +44,13 @@ class FsHelpers {
     };
   }
 
-  writeFile(fileName: Path, data: string): RetVal {
+  writeFile(fileName: string, data: string): RetVal {
     this.outputFileSync(this.getAbsolutePath(fileName).value, data);
     return { success: true, error: null };
   }
 
   private checkIfPathExists(
-    pathValue: Path | undefined,
+    pathValue: string | undefined,
     pathType: string,
     isExpectedType: (stats: { isFile(): boolean; isDirectory(): boolean }) => boolean,
   ): RetBool {
@@ -68,15 +68,15 @@ class FsHelpers {
     return { success: true, value: true, error: null };
   }
 
-  checkIfFileExists(filePath: Path): RetBool {
+  checkIfFileExists(filePath: string): RetBool {
     return this.checkIfPathExists(filePath, 'file', stats => stats.isFile());
   }
 
-  checkIfDirExists(dir: Path | undefined): RetBool {
+  checkIfDirExists(dir: string | undefined): RetBool {
     return this.checkIfPathExists(dir, 'directory', stats => stats.isDirectory());
   }
 
-  getAbsolutePath(dir: Path | undefined): RetPath {
+  getAbsolutePath(dir: string | undefined): RetPath {
     try {
       if (dir === undefined) throw new Error(`Dir is undefined.`);
       if (dir.match(/^[.a-zA-Z0-9\-_/:\\]+$/g) === null) {
@@ -93,7 +93,7 @@ class FsHelpers {
     }
   }
 
-  createDir(dir: Path): RetPath {
+  createDir(dir: string): RetPath {
     try {
       if (dir === undefined) throw new Error(`Function "createDir" expected a path. Recieved "${dir}".`);
       const absDir = this.getAbsolutePath(dir).value;
@@ -105,14 +105,14 @@ class FsHelpers {
     }
   }
 
-  touchFile(filePath: Path, perms?: number): RetVal {
+  touchFile(filePath: string, perms?: number): RetVal {
     const absPath = this.getAbsolutePath(filePath).value;
     this.ensureFileSync(absPath);
     if (perms !== undefined) this.chmodSync(absPath, perms);
     return { success: true, error: null };
   }
 
-  rimrafDir(dir: Path | undefined): RetPath {
+  rimrafDir(dir: string | undefined): RetPath {
     const absPath = this.getAbsolutePath(dir).value;
     if (absPath !== undefined && this.checkIfDirExists(dir).value) {
       this.removeSync(dir);
@@ -122,11 +122,11 @@ class FsHelpers {
     return { success: false, value: undefined, error: `Error deleting dir: '${dir}'` };
   }
 
-  rimrafDirs(dirs: Path[]): RetPath[] {
+  rimrafDirs(dirs: string[]): RetPath[] {
     return dirs.map(dir => this.rimrafDir(this.getAbsolutePath(dir).value));
   }
 
-  abortDirCreation(dir: Path): RetVal {
+  abortDirCreation(dir: string): RetVal {
     if (dir !== null && this.checkIfDirExists(dir).value) {
       console.error(`Cleaning up due to abort, directories created starting at: ${JSON.stringify(dir)}`);
       this.rimrafDir(dir);
@@ -136,7 +136,7 @@ class FsHelpers {
     return { success: false, error: `Cleaning up due to abort, no directory to clean up.` };
   }
 
-  renameDir(oldPath: Path, newPath: Path): RetString {
+  renameDir(oldPath: string, newPath: string): RetString {
     try {
       this.renameSync(this.getAbsolutePath(oldPath).value, this.getAbsolutePath(newPath).value);
       return { success: true, value: `Successfully renamed the directory.`, error: null };
@@ -146,7 +146,7 @@ class FsHelpers {
     }
   }
 
-  copyDirAbs(src: Path, dest: Path): RetVal {
+  copyDirAbs(src: string, dest: string): RetVal {
     try {
       this.copySync(this.getAbsolutePath(src).value, this.getAbsolutePath(dest).value, { overwrite: false, errorOnExist: true });
       return { success: true, error: null };

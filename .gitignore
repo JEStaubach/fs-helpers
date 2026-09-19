@@ -106,4 +106,7 @@ dist
 # fs-helpers test output root
 .testDir/
 
+# SonarScanner working directory
+.scannerwork/
+
 .secrets.*
