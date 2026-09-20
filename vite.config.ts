@@ -1,20 +1,18 @@
 /// <reference types="vitest" />
 
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import lodash from 'lodash';
+import escapeRegExp from 'lodash/escapeRegExp';
 import dts from 'vite-plugin-dts';
 import builtinModules from 'builtin-modules';
 import pkg from './package.json';
 import commonjsExternals from 'vite-plugin-commonjs-externals';
 
-const { escapeRegExp } = lodash;
-
 const externals = [
   'child_process', 
   ...builtinModules,
   ...Object.keys(pkg.dependencies).map(
-    name => new RegExp('^' + escapeRegExp(name) + '(\\/.+)?$')
+    name => new RegExp('^' + escapeRegExp(name) + String.raw`(\/.+)?$`)
   )
 ];
 

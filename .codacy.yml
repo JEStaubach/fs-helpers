@@ -1,5 +1,10 @@
 ---
 engines:
+  eslint-8:
+    enabled: true
+    config-file: eslint.config.mjs
+  prettier:
+    enabled: false
   duplication:
     enabled: true
     exclude_paths:
