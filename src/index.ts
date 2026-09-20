@@ -93,7 +93,7 @@ class FsHelpers {
     }
   }
 
-  createDir(dir: string): RetPath {
+  createDir(dir: string | undefined): RetPath {
     try {
       if (dir === undefined) throw new Error(`Function "createDir" expected a path. Recieved "${dir}".`);
       const absDir = this.getAbsolutePath(dir).value;
@@ -126,7 +126,7 @@ class FsHelpers {
     return dirs.map(dir => this.rimrafDir(this.getAbsolutePath(dir).value));
   }
 
-  abortDirCreation(dir: string): RetVal {
+  abortDirCreation(dir: string | null): RetVal {
     if (dir !== null && this.checkIfDirExists(dir).value) {
       console.error(`Cleaning up due to abort, directories created starting at: ${JSON.stringify(dir)}`);
       this.rimrafDir(dir);
