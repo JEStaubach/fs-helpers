@@ -50,7 +50,7 @@
     "@vitest/coverage-istanbul": "^0.34.5",
     "eslint": "^8.57.0",
     "typescript": "^5.2.2",
-    "vite": "^4.4.9",
+    "vite": "^8.3.0",
     "vite-plugin-dts": "^3.6.0",
     "vitest": "^0.34.5"
   }
