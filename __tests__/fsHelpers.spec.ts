@@ -183,6 +183,13 @@ Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
         expect(spy).toHaveBeenCalled();
         expect(spy).toHaveBeenLastCalledWith(`Error resolving path: <ABC`);
       });
+
+      it(`fails and errors out if no path is provided`, () => {
+        const res = fsHelpers.getAbsolutePath(undefined);
+        expect(res.success).toBe(false);
+        expect(res.value).toBeUndefined();
+        expect(res.error).toContain(`Dir is undefined.`);
+      });
     });
 
     describe(`[${key}]-[${pathVersion}] createDir`, () => {

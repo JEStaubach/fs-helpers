@@ -23,8 +23,14 @@ jobs:
 
       - name: Build native dependencies
         run: npm rebuild esbuild
+      - name: Install Qlty CLI
+        uses: qltysh/qlty-action/install@08a0a862c159eae9b9003081da6663d96efef637 # v2.3.0
       - name: Build
         run: npm run build
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run Qlty checks
+        run: qlty check --all --no-fix --no-progress --no-fail
       - name: Run tests and collect coverage
         run: npm test
       - name: Upload coverage to Qlty

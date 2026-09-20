@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "build": "tsc && vite build",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run --coverage --reporter dot"
   },
   "dependencies": {
@@ -43,7 +44,11 @@
     "@types/fs-extra": "^11.0.2",
     "@types/lodash": "^4.14.199",
     "@types/node": "^20.7.0",
+    "@eslint/js": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "@vitest/coverage-istanbul": "^0.34.5",
+    "eslint": "^8.57.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
     "vite-plugin-dts": "^3.6.0",
