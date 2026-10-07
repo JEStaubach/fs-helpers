@@ -25,6 +25,20 @@ describe(`mock readFile fallback`, () => {
   });
 });
 
+describe(`destructured methods`, () => {
+  it(`preserves the receiver for methods that call other methods`, () => {
+    const fsHelpers = fsh.use(fsh.mock);
+    const dir = `${rootTestDir}/destructured-method`;
+    fsHelpers.createDir(dir);
+    const { rimrafDirs } = fsHelpers;
+
+    const results = rimrafDirs([dir]);
+
+    expect(results[0].success).toBe(true);
+    expect(fsHelpers.checkIfDirExists(dir).value).toBe(false);
+  });
+});
+
 Object.entries(fsLibraryVariations).forEach(([key, fsHelpers]) => {
 
   // iterate over providng functions relative and absolute paths

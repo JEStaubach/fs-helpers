@@ -24,6 +24,19 @@ class FsHelpers {
       outputFileSync: this.outputFileSync, mkdirpSync: this.mkdirpSync,
       seedFile: this.seedFile } = fsLibrary);
 
+    this.readFile = this.readFile.bind(this);
+    this.writeFile = this.writeFile.bind(this);
+    this.checkIfFileExists = this.checkIfFileExists.bind(this);
+    this.checkIfDirExists = this.checkIfDirExists.bind(this);
+    this.getAbsolutePath = this.getAbsolutePath.bind(this);
+    this.createDir = this.createDir.bind(this);
+    this.touchFile = this.touchFile.bind(this);
+    this.rimrafDir = this.rimrafDir.bind(this);
+    this.rimrafDirs = this.rimrafDirs.bind(this);
+    this.abortDirCreation = this.abortDirCreation.bind(this);
+    this.renameDir = this.renameDir.bind(this);
+    this.copyDirAbs = this.copyDirAbs.bind(this);
+
     if (this.seedFile !== undefined && seedFiles !== undefined) {
       for (const file of seedFiles) {
         this.mockExistingFile(file);
