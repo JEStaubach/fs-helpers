@@ -11,6 +11,7 @@ import commonjsExternals from 'vite-plugin-commonjs-externals';
 const externals = [
   'child_process', 
   ...builtinModules,
+  ...builtinModules.map(module => `node:${module}`),
   ...Object.keys(pkg.dependencies).map(
     name => new RegExp('^' + escapeRegExp(name) + String.raw`(\/.+)?$`)
   )
