@@ -39,6 +39,7 @@
   ],
   "scripts": {
     "build": "tsc && vite build",
+    "commit": "commit",
     "lint": "eslint . --max-warnings 0",
     "prepare": "husky",
     "test": "vitest run --coverage --reporter dot && npm run test:package",
@@ -49,6 +50,9 @@
     "fs-extra": "^11.4.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/prompt-cli": "^21.2.3",
     "@eslint/js": "^10.0.1",
     "@types/lodash": "^4.17.25",
     "@types/node": "^22.20.5",

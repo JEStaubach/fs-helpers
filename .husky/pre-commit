@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+branch=$(git branch --show-current)
+if [[ "$branch" == "main" ]]; then
+    echo "Error: commits directly on 'main' are blocked." >&2
+    echo "Create and switch to a feature branch, then retry:" >&2
+    echo "  git switch -c feat/your-change" >&2
+    exit 1
+fi
+
 for tool in detect-secrets jq comm; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "Error: required system command '$tool' is not installed." >&2
