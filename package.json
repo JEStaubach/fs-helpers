@@ -1,10 +1,17 @@
 {
   "name": "@jestaubach/fs-helpers",
-  "version": "0.2.29",
+  "version": "0.2.30",
   "type": "module",
   "main": "./dist/fs-helpers.umd.cjs",
   "module": "./dist/fs-helpers.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-helpers.js",
+      "require": "./dist/fs-helpers.umd.cjs"
+    }
+  },
   "description": "wrapper around fs-extra",
   "keywords": [],
   "homepage": "https://github.com/JEStaubach/fs-helpers",
@@ -26,32 +33,34 @@
   "license": "MIT",
   "private": false,
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md",
+    "MIGRATION.md"
   ],
   "scripts": {
     "build": "tsc && vite build",
     "lint": "eslint . --max-warnings 0",
-    "test": "vitest run --coverage --reporter dot"
+    "test": "vitest run --coverage --reporter dot && npm run test:package",
+    "test:package": "npm run build && node --test __tests__/package-exports.smoke.mjs"
   },
   "dependencies": {
-    "builtin-modules": "^3.3.0",
-    "fs-extra": "^11.1.1",
-    "lodash": "^4.17.21",
-    "mkdirp": "^3.0.1",
-    "vite-plugin-commonjs-externals": "^0.1.3"
+    "@types/fs-extra": "^11.0.4",
+    "fs-extra": "^11.4.1"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.2",
-    "@types/lodash": "^4.14.199",
-    "@types/node": "^20.7.0",
-    "@eslint/js": "^8.57.0",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "@vitest/coverage-istanbul": "^0.34.5",
-    "eslint": "^8.57.0",
-    "typescript": "^5.2.2",
-    "vite": "^4.4.9",
-    "vite-plugin-dts": "^3.6.0",
-    "vitest": "^0.34.5"
+    "@eslint/js": "^10.0.1",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^22.20.5",
+    "@typescript-eslint/eslint-plugin": "^8.71.1",
+    "@typescript-eslint/parser": "^8.71.1",
+    "@vitest/coverage-istanbul": "^5.0.3",
+    "builtin-modules": "^5.4.0",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "lodash": "^4.18.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.3",
+    "unplugin-dts": "^1.1.2",
+    "vitest": "^5.0.3"
   }
 }

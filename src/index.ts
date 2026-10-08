@@ -1,8 +1,8 @@
 
 import fsExtra from 'fs-extra';
 import path from 'node:path';
-import { RetBool, RetPath, RetString, RetVal, RetBuffer } from './types';
-import mock from './mock';
+import { RetBool, RetPath, RetString, RetVal, RetBuffer } from './types.js';
+import mock from './mock.js';
 
 class FsHelpers {
   private readonly existsSync: any;

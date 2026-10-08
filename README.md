@@ -1,5 +1,7 @@
 # fs-helpers
 
+See the [changelog](CHANGELOG.md) and [migration guide](MIGRATION.md).
+
 ## Badges
 
 [![Maintainability](https://qlty.sh/gh/JEStaubach/projects/fs-helpers/maintainability.svg)](https://qlty.sh/gh/JEStaubach/projects/fs-helpers)
