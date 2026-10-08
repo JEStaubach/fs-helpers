@@ -1,6 +1,6 @@
 # Migration Guide
 
-## 0.2.30
+## 0.2.31
 
 This release does not remove APIs or change the shape of the package exports. Existing helper creation and synchronous methods continue to work. The only behavior change for consumers is a deprecation warning when Node.js loads the CommonJS entry.
 
@@ -33,7 +33,7 @@ The warning is specific to the Node.js CommonJS/UMD bundle. Loading the UMD bund
 To move an application or downstream package to this release:
 
 ```sh
-npm install @jestaubach/fs-helpers@^0.2.30
+npm install @jestaubach/fs-helpers@^0.2.31
 ```
 
 No downstream source changes are required unless you choose to migrate from CommonJS to ESM.

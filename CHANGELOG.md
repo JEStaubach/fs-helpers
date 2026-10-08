@@ -4,7 +4,7 @@ All notable changes to this project are documented here.
 
 This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.2.30
+## 0.2.31
 
 ### Changed
 
