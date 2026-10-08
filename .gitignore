@@ -110,3 +110,4 @@ dist
 .scannerwork/
 
 .secrets.*
+!.secrets.baseline

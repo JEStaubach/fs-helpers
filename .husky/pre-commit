@@ -1,59 +1,106 @@
 #!/usr/bin/env bash
-. "$(dirname -- "$0")/_/husky.sh"
+set -euo pipefail
 
-# Check if detect-secrets is installed
-if ! command -v detect-secrets &> /dev/null
-then
-    echo "Warning: detect-secrets is not installed."
-    echo "!!! detect-secrets will not be run."
+for tool in detect-secrets jq comm; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "Error: required system command '$tool' is not installed." >&2
+        exit 1
+    fi
+done
+
+# The optional word list relies on pyahocorasick in the system Python environment.
+if [ -f wordlist.txt ]; then
+    if ! command -v python >/dev/null 2>&1; then
+        echo "Error: wordlist.txt requires Python and pyahocorasick, but 'python' is not installed." >&2
+        echo "Install Python and run: python -m pip install pyahocorasick" >&2
+        exit 1
+    fi
+    if ! python -c "import ahocorasick" >/dev/null 2>&1; then
+        echo "Error: wordlist.txt requires pyahocorasick in the system Python environment." >&2
+        echo "Install it with: python -m pip install pyahocorasick" >&2
+        exit 1
+    fi
+fi
+
+# Use the custom word list only when present; otherwise use scanner defaults.
+scan_secrets() {
+    if [ -f wordlist.txt ]; then
+        detect-secrets scan --no-verify --word-list wordlist.txt "$@"
+    else
+        detect-secrets scan --no-verify "$@"
+    fi
+}
+
+list_secrets() {
+    jq -r '.results | to_entries[]? | .key as $file | .value[]? | "\($file),\(.hashed_secret)"' "$1" | sort
+}
+
+show_findings() {
+    jq -r '.results | to_entries[]? | .key as $file | .value[]? | "\($file):\(.line_number) (\(.type))"' "$1"
+}
+
+show_review_instructions() {
+    echo "If a finding is a real secret, remove it and revoke or rotate it before retrying."
+    echo "For verified false positives, manually update the baseline with:"
+    if [ -f .secrets.baseline ]; then
+        if [ -f wordlist.txt ]; then
+            echo "  detect-secrets scan --no-verify --word-list wordlist.txt --baseline .secrets.baseline"
+        else
+            echo "  detect-secrets scan --no-verify --baseline .secrets.baseline"
+        fi
+    elif [ -f wordlist.txt ]; then
+        echo "  detect-secrets scan --no-verify --word-list wordlist.txt > .secrets.baseline"
+    else
+        echo "  detect-secrets scan --no-verify > .secrets.baseline"
+    fi
+    echo "Then review the entries with:"
+    echo "  detect-secrets audit .secrets.baseline"
+    echo "Stage the reviewed baseline and rerun the commit:"
+    echo "  git add .secrets.baseline"
+}
+
+first_scan=
+candidate=
+baseline_list=
+candidate_list=
+cleanup() {
+    rm -f "$first_scan" "$candidate" "$baseline_list" "$candidate_list"
+}
+trap cleanup EXIT HUP INT TERM
+
+if [ ! -f .secrets.baseline ]; then
+    # Do not create a trusted baseline when the first scan finds suspected secrets.
+    echo "No secrets baseline found; scanning the repository..."
+    first_scan=$(mktemp .secrets.first-run.XXXXXX)
+    scan_secrets > "$first_scan"
+    findings=$(show_findings "$first_scan")
+    if [ -n "$findings" ]; then
+        echo "Suspected secrets found. No baseline was created:" >&2
+        printf '%s\n' "$findings" >&2
+        show_review_instructions >&2
+        exit 1
+    fi
+    mv "$first_scan" .secrets.baseline
+    first_scan=
+    echo "No suspected secrets found; created .secrets.baseline. Add it to version control."
     exit 0
 fi
-# Check if pyahocorasick is installed (word-list)
-if ! python -c "import ahocorasick" &> /dev/null
-then
-    echo "Warning: pyahocorasick is not installed."
-    echo "!!! detect-secrets will not be run."
-    exit 0
-fi
-# Check if jq is installed
-if ! command -v jq &> /dev/null
-then
-    echo "Warning: jq is not installed."
-    echo "!!! detect-secrets will not be run."
-    exit 0
-fi
 
-# if there is no baseline, create one
-if [ ! -e .secrets.baseline ]; then
-    echo "Creating baseline..."
-    detect-secrets scan --no-verify --word-list wordlist.txt > .secrets.baseline
-fi
+candidate=$(mktemp .secrets.candidate.XXXXXX)
+baseline_list=$(mktemp .secrets.baseline-list.XXXXXX)
+candidate_list=$(mktemp .secrets.candidate-list.XXXXXX)
+cp .secrets.baseline "$candidate"
+# Update a temporary copy so a failed scan never changes the accepted baseline.
+scan_secrets --baseline "$candidate" >/dev/null
+list_secrets .secrets.baseline > "$baseline_list"
+list_secrets "$candidate" > "$candidate_list"
+new_secrets=$(comm -13 "$baseline_list" "$candidate_list")
 
-# backup the list of known secrets
-cp .secrets.baseline .secrets.new
-
-# find all the secrets in the repository
-echo "Running detect-secrets on repo..."
-detect-secrets scan --no-verify --word-list wordlist.txt --baseline .secrets.new $(find . -type f ! -name '.secrets.*' ! -path '*/.git*' ! -path '*/node_modules/*') > /dev/null
-
-# if there is any difference between the known and newly detected secrets, break the build
-list_secrets() { jq -r '.results | keys[] as $key | "\($key),\(.[$key] | .[] | .hashed_secret)"' "$1" | sort; }
-
-# create named pipes
-mkfifo base.fifo
-mkfifo new.fifo
-
-# run the list_secrets command
-list_secrets .secrets.baseline >base.fifo &
-list_secrets .secrets.new >new.fifo &
-
-# compare the two lists
-if ! diff new.fifo base.fifo >&2 ; then
-  rm -f base.fifo new.fifo
-  echo "Detected new secrets in the repo" >&2
+if [ -n "$new_secrets" ]; then
+    echo "New suspected secrets found; the existing baseline was not changed:" >&2
+    show_findings "$candidate" >&2
+    show_review_instructions >&2
   exit 1
 fi
 
-# clean up
-rm -f base.fifo new.fifo
-rm -f .secrets.new
+echo "No new suspected secrets found."
