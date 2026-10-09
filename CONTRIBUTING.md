@@ -1,32 +1,29 @@
 # CONTRIBUTING
 
+## Commit Messages
+
+Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/), in the form `type(scope): description` or `type: description`.
+
+Examples:
+
+- `feat(copy): preserve timestamps`
+- `fix: handle empty paths`
+- `docs: clarify ESM migration`
+- `feat!: remove the legacy API` with a `BREAKING CHANGE:` footer describing the impact
+
+Common types include `feat`, `fix`, `docs`, `refactor`, `test`, `build`, and `chore`. A `feat` indicates a minor change, a `fix` indicates a patch, and a breaking change must be marked with `!` or a `BREAKING CHANGE:` footer.
+
+To create a commit with an interactive prompt, stage the intended changes and run `npm run commit`. The Commitlint prompt asks for Conventional Commit fields and creates the commit; the `commit-msg` hook validates the resulting message.
+
 ## Release Process
 
-Adapted from Cloud Four's [Standard Release Process](https://cloudfour.com/thinks/how-to-publish-an-updated-version-of-an-npm-package/).
+After Conventional Commit changes pass CI and are merged to `main`, the Release workflow opens or updates a release PR. Review the proposed version and changelog, and add or update `MIGRATION.md` manually when consumers need migration guidance. Merge the release PR to create the GitHub release and publish the tested tag to npm.
 
-### Safety Checks
+Before enabling releases, create a fine-grained GitHub token limited to this repository with `contents`, `issues`, and `pull requests` set to read and write, then save it as the `RELEASE_PLEASE_TOKEN` Actions secret. This lets release-please create release PRs and allows their CI workflows to run.
 
-1. git pull
-1. git status
-1. npm ci
-1. npm test
+For npm publishing, configure a trusted publisher on npmjs.com for owner `JEStaubach`, repository `fs-helpers`, and workflow filename `release-please.yml`. Allow direct publishing for this trusted publisher. The package must be configured before a release can publish.
 
-### Prepare the release
-
-1. npm run build
-1. npm test
-
-### Update the version number
-
-1. .scripts/bump.sh [patch|minor|major]
-
-### Publish to npm
-
-1. npm publish --access=public
-
-### git push
-
-1. git push -u origin && git push -u origin --tags
+Breaking changes before `1.0.0` are configured to increment the minor version.
 
 ## Debugging
 
