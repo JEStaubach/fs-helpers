@@ -41,9 +41,13 @@ export default defineConfig({
     }),
   ],
   test: {
+    environment: 'node',
+    testTimeout: 20000,
     coverage: {
       provider: 'istanbul',
-      reporter: [`text`, `json`, `html`, `lcov`]
+      reporter: [`text`, `json`, `html`, `lcov`],
+      include: ['src'],
+      exclude: ['src/**/*.d.ts', 'src/**/__tests__/**'],
     }
   },
 });
