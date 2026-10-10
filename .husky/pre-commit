@@ -99,7 +99,7 @@ baseline_list=$(mktemp .secrets.baseline-list.XXXXXX)
 candidate_list=$(mktemp .secrets.candidate-list.XXXXXX)
 cp .secrets.baseline "$candidate"
 # Update a temporary copy so a failed scan never changes the accepted baseline.
-scan_secrets --baseline "$candidate" >/dev/null
+scan_secrets --baseline "$candidate" $(find . -type f ! -name '.secrets.*' ! -path '*/.git*' ! -path '*/node_modules/*') >/dev/null
 list_secrets .secrets.baseline > "$baseline_list"
 list_secrets "$candidate" > "$candidate_list"
 new_secrets=$(comm -13 "$baseline_list" "$candidate_list")
