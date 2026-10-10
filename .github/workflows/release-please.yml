@@ -60,12 +60,15 @@ jobs:
           ref: ${{ needs.release-please.outputs.tag_name }}
           persist-credentials: false
 
-      - name: Set up Node 24 for npm trusted publishing
+      - name: Set up Node 22 for npm trusted publishing
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version: 22
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
+
+      - name: Set up npm for trusted publishing
+        run: npm install --global npm@^11
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
