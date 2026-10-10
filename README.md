@@ -2,6 +2,9 @@
 
 See the [changelog](CHANGELOG.md) and [migration guide](MIGRATION.md).
 
+[![npm version](https://img.shields.io/npm/v/%40jestaubach%2Ffs-helpers)](https://www.npmjs.com/package/@jestaubach/fs-helpers)
+[![npm downloads](https://img.shields.io/npm/dm/%40jestaubach%2Ffs-helpers)](https://www.npmjs.com/package/@jestaubach/fs-helpers)
+
 ## Badges
 
 [![Maintainability](https://qlty.sh/gh/JEStaubach/projects/fs-helpers/maintainability.svg)](https://qlty.sh/gh/JEStaubach/projects/fs-helpers)

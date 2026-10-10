@@ -19,7 +19,10 @@
     "skipLibCheck": true
   },
   "include": [
-    "src",
-    "__tests__"
+    "src"
+  ],
+  "exclude": [
+    "__tests__/**/*.ts",
+    "src/**/__tests__/**/*.ts"
   ]
 }
