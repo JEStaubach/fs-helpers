@@ -30,3 +30,13 @@ See the [changelog](CHANGELOG.md) and [migration guide](MIGRATION.md).
 ## CodeCov Coverage Map
 
 ![CodeCov](https://codecov.io/gh/JEStaubach/fs-helpers/graphs/sunburst.svg?token=HVCTV3OBY3)
+
+## Development
+
+Requires Node.js 22 or newer. Run the package checks with:
+
+```sh
+npm ci
+npm test
+npm run lint
+```
