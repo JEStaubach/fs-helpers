@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.32](https://github.com/JEStaubach/fs-helpers/compare/fs-helpers-v0.2.31...fs-helpers-v0.2.32) (2026-10-11)
+
+
+### Miscellaneous Chores
+
+* add Codacy upload and migrate coverage to V8 ([#99](https://github.com/JEStaubach/fs-helpers/issues/99)) ([ae8d494](https://github.com/JEStaubach/fs-helpers/commit/ae8d494dcb65829bd542c900cf453441285fc9fc))
+
 ## 0.2.31
 
 ### Changed
