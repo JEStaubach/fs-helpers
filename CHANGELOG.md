@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.34](https://github.com/JEStaubach/fs-helpers/compare/fs-helpers-v0.2.33...fs-helpers-v0.2.34) (2026-10-12)
+
+
+### Continuous Integration
+
+* **coderabbit:** add coderabbit config file ([#104](https://github.com/JEStaubach/fs-helpers/issues/104)) ([0811730](https://github.com/JEStaubach/fs-helpers/commit/08117302fcf0476e1cce8b9ba7a555402677fa6a))
+
 ## [0.2.33](https://github.com/JEStaubach/fs-helpers/compare/fs-helpers-v0.2.32...fs-helpers-v0.2.33) (2026-10-11)
 
 
