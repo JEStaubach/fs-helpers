@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.35](https://github.com/JEStaubach/fs-helpers/compare/fs-helpers-v0.2.34...fs-helpers-v0.2.35) (2026-10-13)
+
+
+### Continuous Integration
+
+* **release-please:** auto merge ([#108](https://github.com/JEStaubach/fs-helpers/issues/108)) ([9243a51](https://github.com/JEStaubach/fs-helpers/commit/9243a51d4d8eeb122fadc52c91cd4047a9a876eb))
+
 ## [0.2.34](https://github.com/JEStaubach/fs-helpers/compare/fs-helpers-v0.2.33...fs-helpers-v0.2.34) (2026-10-12)
 
 
